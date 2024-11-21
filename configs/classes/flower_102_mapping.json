@@ -1,0 +1,128 @@
+{
+    "wildflowers": [
+      "canterbury bells",
+      "corn poppy",
+      "love in the mist",
+      "sweet pea",
+      "english marigold",
+      "bee balm",
+      "buttercup",
+      "common dandelion",
+      "primula",
+      "foxglove",
+      "petunia",
+      "wild pansy",
+      "columbine",
+      "bishop of llandaff",
+      "snapdragon",
+      "mexican aster"
+    ],
+    "garden_flowers": [
+      "pink primrose",
+      "garden phlox",
+      "globe thistle",
+      "king protea",
+      "carnation",
+      "silverbush",
+      "japanese anemone",
+      "daffodil",
+      "californian poppy",
+      "barbeton daisy",
+      "wallflower",
+      "geranium",
+      "rose",
+      "marigold",
+      "mexican petunia",
+      "pelargonium",
+      "sweet william",
+      "lenten rose",
+      "osteospermum",
+      "cape flower",
+      "balloon flower"
+    ],
+    "exotic_flowers": [
+      "moon orchid",
+      "bird of paradise",
+      "ruby-lipped cattleya",
+      "passion flower",
+      "frangipani",
+      "anthurium",
+      "desert-rose",
+      "bromelia",
+      "blackberry lily",
+      "cyclamen",
+      "thorn apple",
+      "monkshood"
+    ],
+    "lilies": [
+      "fire lily",
+      "tiger lily",
+      "giant white arum lily",
+      "peruvian lily",
+      "canna lily",
+      "tree poppy",
+      "toad lily",
+      "sword lily"
+    ],
+    "irises_and_related": [
+      "yellow iris",
+      "bearded iris",
+      "globe-flower",
+      "grape hyacinth",
+      "spring crocus",
+      "spear thistle",
+      "black-eyed susan",
+      "windflower",
+      "pincushion flower",
+      "cautleya spicata",
+      "purple coneflower",
+      "hippeastrum"
+    ],
+    "shrubs_and_woody_flowers": [
+      "magnolia",
+      "camellia",
+      "bougainvillea",
+      "hibiscus",
+      "azalea",
+      "tree mallow",
+      "mallow",
+      "fritillary"
+    ],
+    "water_flowers": [
+      "water lily",
+      "lotus lotus",
+      "watercress",
+      "ball moss"
+    ],
+    "asters_and_daisies": [
+      "blanket flower",
+      "gaura",
+      "poinsettia",
+      "oxeye daisy",
+      "gazania",
+      "sunflower"
+    ],
+    "tropical_flowers": [
+      "siam tulip",
+      "alpine sea holly",
+      "red ginger",
+      "prince of wales feathers",
+      "great masterwort"
+    ],
+    "climbing_flowers": [
+      "morning glory",
+      "clematis",
+      "trumpet creeper"
+    ],
+    "dahlias": [
+      "pink-yellow dahlia",
+      "orange dahlia"
+    ],
+    "miscellaneous": [
+      "bolero deep blue",
+      "hard-leaved pocket orchid",
+      "artichoke",
+      "stemless gentian",
+      "colt's foot"
+    ]
+  }

@@ -1,0 +1,128 @@
+{
+    "desserts": [
+        "apple_pie",
+        "baklava",
+        "beignets",
+        "bread_pudding",
+        "carrot_cake",
+        "cheesecake",
+        "chocolate_cake",
+        "chocolate_mousse",
+        "churros",
+        "cup_cakes",
+        "donuts",
+        "frozen_yogurt",
+        "macarons",
+        "panna_cotta",
+        "red_velvet_cake",
+        "strawberry_shortcake",
+        "tiramisu",
+        "cannoli",
+        "creme_brulee",
+        "ice_cream"
+    ],
+    "salads": [
+        "beet_salad",
+        "caesar_salad",
+        "caprese_salad",
+        "greek_salad",
+        "seaweed_salad"
+    ],
+    "sandwiches": [
+        "breakfast_burrito",
+        "club_sandwich",
+        "croque_madame",
+        "grilled_cheese_sandwich",
+        "hamburger",
+        "hot_dog",
+        "lobster_roll_sandwich",
+        "pulled_pork_sandwich"
+    ],
+    "meat_dishes": [
+        "baby_back_ribs",
+        "beef_carpaccio",
+        "beef_tartare",
+        "chicken_curry",
+        "chicken_quesadilla",
+        "chicken_wings",
+        "filet_mignon",
+        "foie_gras",
+        "fried_chicken",
+        "pork_chop",
+        "prime_rib",
+        "steak"
+    ],
+    "seafood": [
+        "crab_cakes",
+        "clam_chowder",
+        "fish_and_chips",
+        "fried_calamari",
+        "grilled_salmon",
+        "lobster_bisque",
+        "mussels",
+        "oysters",
+        "scallops",
+        "shrimp_and_grits",
+        "sushi",
+        "sashimi",
+        "tuna_tartare",
+        "escargots",
+        "ceviche",
+        "paella"
+    ],
+    "soups": [
+        "french_onion_soup",
+        "hot_and_sour_soup",
+        "miso_soup",
+        "pho"
+    ],
+    "pasta_dishes": [
+        "gnocchi",
+        "lasagna",
+        "macaroni_and_cheese",
+        "ravioli",
+        "spaghetti_bolognese",
+        "spaghetti_carbonara",
+        "risotto"
+    ],
+    "asian_dishes": [
+        "dumplings",
+        "edamame",
+        "ramen",
+        "samosa",
+        "spring_rolls",
+        "takoyaki",
+        "gyoza",
+        "peking_duck",
+        "pad_thai",
+        "bibimbap"
+    ],
+    "fried_food": [
+        "fried_rice",
+        "french_fries",
+        "onion_rings"
+    ],
+    "breakfast_items": [
+        "eggs_benedict",
+        "french_toast",
+        "pancakes",
+        "waffles",
+        "huevos_rancheros",
+        "omelette"
+    ],
+    "appetizers": [
+        "bruschetta",
+        "garlic_bread",
+        "deviled_eggs",
+        "guacamole",
+        "nachos",
+        "cheese_plate"
+    ],
+    "international_dishes": [
+        "hummus",
+        "tacos",
+        "poutine",
+        "pizza",
+        "falafel"
+    ]
+}
