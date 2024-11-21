@@ -47,7 +47,7 @@ def iterate_repair_model(
     mean,
     std,
     device,
-    args
+    args,
 ):
     working_inc_predicts, working_inc_probs = model_forward(
         inc_dataloader, working_model
@@ -58,7 +58,7 @@ def iterate_repair_model(
 
     """1. Unlearning confident disagreement data"""
     disagree_threshold = 0.75
-    tradeoff_alpha = 2/3
+    tradeoff_alpha = 2 / 3
     disagree_idx = working_inc_predicts != teacher_inc_predicts
     disagree_data = inc_data[disagree_idx]
     teacher_disagree_probs = teacher_inc_probs[disagree_idx]
@@ -67,12 +67,14 @@ def iterate_repair_model(
     # teacher_disagree_preds = teacher_inc_predicts[disagree_idx]
     teacher_disagree_model_conf = np.max(teacher_disagree_probs, axis=-1)
     worker_disagree_model_conf = np.max(worker_disagree_probs, axis=-1)
-    joint_disagree_model_conf = np.sqrt(teacher_disagree_model_conf * worker_disagree_model_conf)
-        # (tradeoff_alpha * worker_disagree_model_conf + (1 - tradeoff_alpha) * teacher_disagree_model_conf)
+    joint_disagree_model_conf = np.sqrt(
+        teacher_disagree_model_conf * worker_disagree_model_conf
+    )
+    # (tradeoff_alpha * worker_disagree_model_conf + (1 - tradeoff_alpha) * teacher_disagree_model_conf)
     disagree_conf_idx = joint_disagree_model_conf >= disagree_threshold
 
     mix_data = disagree_data[disagree_conf_idx]
-    gamma = len(mix_data)/(len(disagree_data) + 1e-6)
+    gamma = len(mix_data) / (len(disagree_data) + 1e-6)
 
     ga_loss_alpha = -1.0  # GA
     mix_worker_labels = worker_disagree_preds[disagree_conf_idx]
@@ -141,7 +143,9 @@ def iterate_repair_model(
     conf_agree_data = agree_data[conf_idx]
     conf_agree_labels = agree_predicts[conf_idx]
     # conf_agree_mix_labels = np.eye(num_classes)[conf_agree_labels]
-    conf_agree_mix_labels = (teacher_agree_probs[conf_idx] + worker_agree_probs[conf_idx])/2
+    conf_agree_mix_labels = (
+        teacher_agree_probs[conf_idx] + worker_agree_probs[conf_idx]
+    ) / 2
 
     disagree_mix_data = disagree_data[~disagree_conf_idx]
     agree_mix_data = agree_data[~conf_idx]
@@ -159,18 +163,24 @@ def iterate_repair_model(
 
         print("Mix up lower confidence for worker model...")
         alpha = 1.2
-        disagree_mix_labels = mixup_data((teacher_disagree_lc_probs, worker_disagree_lc_probs), 2, alpha)
+        disagree_mix_labels = mixup_data(
+            (teacher_disagree_lc_probs, worker_disagree_lc_probs), 2, alpha
+        )
         # tradeoff_alpha * teacher_disagree_lc_probs + (1 - tradeoff_alpha) * worker_disagree_lc_probs
-        agree_mix_labels = mixup_data((teacher_agree_lc_probs, worker_agree_lc_probs), 2, alpha)
+        agree_mix_labels = mixup_data(
+            (teacher_agree_lc_probs, worker_agree_lc_probs), 2, alpha
+        )
         # tradeoff_alpha * teacher_agree_lc_probs + (1 - tradeoff_alpha) * worker_agree_lc_probs
         mix_lc_label = np.concatenate([disagree_mix_labels, agree_mix_labels], axis=0)
         mix_lc_label = sharpen(mix_lc_label, T=temperature)
         if args.mixup_alpha == 0:
             mix_train = (mix_lc_data, mix_lc_label, mix_lc_data, mix_lc_label)
         else:
-            mix_train = (mix_lc_data, mix_lc_label, conf_agree_data, conf_agree_mix_labels) \
-                if len(mix_lc_label) > len(conf_agree_mix_labels) \
+            mix_train = (
+                (mix_lc_data, mix_lc_label, conf_agree_data, conf_agree_mix_labels)
+                if len(mix_lc_label) > len(conf_agree_mix_labels)
                 else (conf_agree_data, conf_agree_mix_labels, mix_lc_data, mix_lc_label)
+            )
 
         mix_dataloader_shuffled = mix_up_dataloader(
             *mix_train,
@@ -179,7 +189,7 @@ def iterate_repair_model(
             batch_size=args.batch_size,
             alpha=args.mixup_alpha,
             transforms=None,
-            first_max=False
+            first_max=False,
         )
 
         model_train(
@@ -195,9 +205,13 @@ def iterate_repair_model(
 
         print("Mix up lower confidence for teacher model...")
 
-        disagree_mix_labels = mixup_data((teacher_disagree_lc_probs, worker_disagree_lc_probs), 2, alpha)
+        disagree_mix_labels = mixup_data(
+            (teacher_disagree_lc_probs, worker_disagree_lc_probs), 2, alpha
+        )
         # tradeoff_alpha * teacher_disagree_lc_probs + (1 - tradeoff_alpha) * worker_disagree_lc_probs
-        agree_mix_labels = mixup_data((teacher_agree_lc_probs, worker_agree_lc_probs), 2, alpha)
+        agree_mix_labels = mixup_data(
+            (teacher_agree_lc_probs, worker_agree_lc_probs), 2, alpha
+        )
         # tradeoff_alpha * teacher_agree_lc_probs + (1 - tradeoff_alpha) * worker_agree_lc_probs
         # agree_mix_labels = sharpen(agree_mix_labels, T=0.8)
         mix_lc_label = np.concatenate([disagree_mix_labels, agree_mix_labels], axis=0)
@@ -205,9 +219,11 @@ def iterate_repair_model(
         if args.mixup_alpha == 0:
             mix_train = (mix_lc_data, mix_lc_label, mix_lc_data, mix_lc_label)
         else:
-            mix_train = (mix_lc_data, mix_lc_label, conf_agree_data, conf_agree_mix_labels) \
-                if len(mix_lc_label) > len(conf_agree_mix_labels) \
+            mix_train = (
+                (mix_lc_data, mix_lc_label, conf_agree_data, conf_agree_mix_labels)
+                if len(mix_lc_label) > len(conf_agree_mix_labels)
                 else (conf_agree_data, conf_agree_mix_labels, mix_lc_data, mix_lc_label)
+            )
 
         mix_dataloader_shuffled = mix_up_dataloader(
             *mix_train,
@@ -216,7 +232,7 @@ def iterate_repair_model(
             batch_size=args.batch_size,
             alpha=args.mixup_alpha,
             transforms=None,
-            first_max=False
+            first_max=False,
         )
         model_train(
             mix_dataloader_shuffled,
@@ -232,7 +248,9 @@ def iterate_repair_model(
     """3. Refine high-confidence agreement data by label smoothing"""
     if args.agree_epochs > 0:
         print("Refine high-confidence for worker model...")
-        conf_agree_probs = label_smooth(conf_agree_labels, num_classes, gamma=args.ls_gamma)
+        conf_agree_probs = label_smooth(
+            conf_agree_labels, num_classes, gamma=args.ls_gamma
+        )
         conf_dataset = NormalizeDataset(
             conf_agree_data, conf_agree_probs, mean=mean, std=std
         )
@@ -274,7 +292,7 @@ def mix_up_dataloader(
     alpha=1.0,
     transforms=None,
     shuffle=True,
-    first_max=True
+    first_max=True,
 ):
     mixed_dataset = MixupDataset(
         data_pair=(inc_data, aug_data),
@@ -283,7 +301,7 @@ def mix_up_dataloader(
         transforms=transforms,
         mean=mean,
         std=std,
-        first_max=first_max
+        first_max=first_max,
     )
     return DataLoader(mixed_dataset, batch_size, drop_last=False, shuffle=shuffle)
 
@@ -335,10 +353,18 @@ def execute(args):
         args.dataset, "pretrain", args.model, model_suffix="pretrain"
     )
     teacher_model_repair_save_path = settings.get_ckpt_path(
-        args.dataset, case, args.model, model_suffix="teacher_restore", unique_name=uni_name,
+        args.dataset,
+        case,
+        args.model,
+        model_suffix="teacher_restore",
+        unique_name=uni_name,
     )
     teacher_history_save_path = settings.get_ckpt_path(
-        args.dataset, case, args.model, model_suffix="teacher_history", unique_name=uni_name,
+        args.dataset,
+        case,
+        args.model,
+        model_suffix="teacher_history",
+        unique_name=uni_name,
     )
 
     mean, std = None, None
@@ -359,11 +385,10 @@ def execute(args):
 
     working_criterion = nn.CrossEntropyLoss()
 
-    # (2) load lip_teacher model, t0的情况重新训练
+    # (2) load lip_teacher model
     backbone = load_custom_model(args.model, num_classes)
     teacher_model = ClassifierWrapper(backbone, num_classes)
 
-    # 根据用户选择的优化器初始化
     teacher_opt, teacher_lr_scheduler = create_optimizer_scheduler(
         optimizer_type,
         teacher_model.parameters(),
@@ -374,14 +399,13 @@ def execute(args):
     teacher_criterion = nn.CrossEntropyLoss()
 
     ul_worker_opt = optim.SGD(working_model.parameters(), lr=ul_lr)
-    ul_worker_lr_scheduler = optim.lr_scheduler.StepLR(ul_worker_opt, step_size=1, gamma=0.9)
+    ul_worker_lr_scheduler = optim.lr_scheduler.StepLR(
+        ul_worker_opt, step_size=1, gamma=0.9
+    )
     ul_teacher_opt = optim.SGD(teacher_model.parameters(), lr=ul_lr)
-    ul_teacher_lr_scheduler = optim.lr_scheduler.StepLR(ul_teacher_opt, step_size=1, gamma=0.9)
-
-
-    # aux_data, aux_labels, aux_dataloader = get_dataset_loader(
-    #     args.dataset, "aux", None, None, mean, std, args.batch_size, shuffle=False
-    # )
+    ul_teacher_lr_scheduler = optim.lr_scheduler.StepLR(
+        ul_teacher_opt, step_size=1, gamma=0.9
+    )
 
     test_data, test_labels, test_dataloader = get_dataset_loader(
         args.dataset, "test", None, None, mean, std, args.batch_size, shuffle=False
@@ -389,14 +413,13 @@ def execute(args):
 
     checkpoint = torch.load(working_model_path)
     working_model.load_state_dict(checkpoint, strict=False)
-    # working_model.to(device)
 
     checkpoint = torch.load(teacher_model_path)
     teacher_model.load_state_dict(checkpoint, strict=False)
     print("load teacher model from :", teacher_model_path)
 
-    # 3. 迭代修复过程
-    # (1) 测试修复前 Dts 在 Mp 的表现
+    # 3. iteratively repaire
+    # (1) test the performance of Mp on dataset Dts before repairment
     print(
         "---------------------working model test before------------------------------"
     )
@@ -410,7 +433,7 @@ def execute(args):
         test_dataloader, teacher_model, device=device
     )
 
-    # (2) 构造修复过程数据集: Dtr、 Da、Dts
+    # (2) construct the datasets for repair: Dtr、 Da、Dts
     inc_data, inc_labels, inc_dataloader = get_dataset_loader(
         args.dataset,
         ["train_clean", "train_noisy"],
@@ -422,7 +445,7 @@ def execute(args):
         shuffle=False,
     )
 
-    # (3) 迭代修复过程：根据 Dtr 迭代 Mp 、 Mt
+    # (3) iteratively repair Mp 、Mt on Dtr
     worker_history = []
     teacher_history = []
     best_worker = 0
@@ -450,7 +473,7 @@ def execute(args):
             mean,
             std,
             device,
-            args
+            args,
         )
 
         working_model_evals = model_test(test_dataloader, working_model, device=device)

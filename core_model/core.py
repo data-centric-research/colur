@@ -17,8 +17,21 @@ from train_test import model_train, model_test, model_forward
 from configs import settings
 
 
-def train_teacher_model(args, step, num_classes, teacher_model, teacher_opt, teacher_lr_scheduler, teacher_criterion,
-                        save_path, mean=None, std=None, train_dataloader=None, test_dataloader=None, test_per_it=1):
+def train_teacher_model(
+    args,
+    step,
+    num_classes,
+    teacher_model,
+    teacher_opt,
+    teacher_lr_scheduler,
+    teacher_criterion,
+    save_path,
+    mean=None,
+    std=None,
+    train_dataloader=None,
+    test_dataloader=None,
+    test_per_it=1,
+):
 
     case = settings.get_case(args.noise_ratio, args.noise_type, args.balanced)
     if train_dataloader is None:
@@ -66,10 +79,29 @@ def train_teacher_model(args, step, num_classes, teacher_model, teacher_opt, tea
     )
 
 
-def iterate_repair_model(working_model, working_opt, working_lr_schedule, working_criterion, working_model_save_path,
-                         teacher_model, teacher_opt, teacher_lr_schedule, teacher_criterion, teacher_model_save_path,
-                         inc_data, inc_labels, inc_dataloader, aux_data, aux_labels, aux_dataloader, num_classes, mean,
-                         std, device, args):
+def iterate_repair_model(
+    working_model,
+    working_opt,
+    working_lr_schedule,
+    working_criterion,
+    working_model_save_path,
+    teacher_model,
+    teacher_opt,
+    teacher_lr_schedule,
+    teacher_criterion,
+    teacher_model_save_path,
+    inc_data,
+    inc_labels,
+    inc_dataloader,
+    aux_data,
+    aux_labels,
+    aux_dataloader,
+    num_classes,
+    mean,
+    std,
+    device,
+    args,
+):
     aux_labels_onehot = np.eye(num_classes)[aux_labels]
 
     # 1. 通过 Mt 获取 D_mix=Da+Ds+Dc,  Train Pp=Mp(Xp_mix), Loss=CrossEntropy(Pp, Yp_mix)
@@ -85,7 +117,7 @@ def iterate_repair_model(working_model, working_opt, working_lr_schedule, workin
     select_idx = agree_idx & (teacher_inc_predicts == inc_labels)
     selected_data = inc_data[select_idx]
     selected_labels = inc_labels[select_idx]
-    selected_probs = teacher_inc_probs[select_idx] # + working_inc_probs[select_idx])/2
+    selected_probs = teacher_inc_probs[select_idx]  # + working_inc_probs[select_idx])/2
     selected_embeddings = teacher_inc_embeddings[select_idx]
 
     # (2) 获取Dc: 通过 Mt(Xa+Xs) 计算class embedding centroids (i.e. Class mean): E_centroid
@@ -193,9 +225,26 @@ def iterate_repair_model(working_model, working_opt, working_lr_schedule, workin
     return conf_data, conf_labels
 
 
-def iterate_adapt_model(working_model, working_opt, working_lr_scheduler, working_criterion, working_model_save_path,
-                        teacher_model, teacher_opt, teacher_lr_scheduler, teacher_criterion, teacher_model_save_path,
-                        aug_data, aug_probs, test_data, test_dataloader, mean, std, device, args):
+def iterate_adapt_model(
+    working_model,
+    working_opt,
+    working_lr_scheduler,
+    working_criterion,
+    working_model_save_path,
+    teacher_model,
+    teacher_opt,
+    teacher_lr_scheduler,
+    teacher_criterion,
+    teacher_model_save_path,
+    aug_data,
+    aug_probs,
+    test_data,
+    test_dataloader,
+    mean,
+    std,
+    device,
+    args,
+):
     # 1. 构造Dts融合数据集 Dt_mix: (Dts, D_aug), 进行mix up
     # (1) 构造 Dts: Dt={Xts, Pts}, Pt = Mt(Xts)
     test_predicts, test_probs = model_forward(test_dataloader, teacher_model)
@@ -269,7 +318,7 @@ def mix_up_dataloader(
     batch_size,
     alpha=1,
     transforms=None,
-    shuffle=True
+    shuffle=True,
 ):
     mixed_dataset = MixupDataset(
         data_pair=(inc_data, aug_data),
@@ -312,12 +361,54 @@ def execute(args):
     uni_name = getattr(args, "uni_name", None)
     spec_norm = not args.no_spnorm
 
-    working_model_path = settings.get_ckpt_path(args.dataset, case, args.model, model_suffix="worker_raw", step=step, unique_name=uni_name) # model_paths["working_model_path"]
-    working_model_repair_save_path = settings.get_ckpt_path(args.dataset, case, args.model, model_suffix="worker_restore", step=step, unique_name=uni_name)
-    working_model_adapt_save_path = settings.get_ckpt_path(args.dataset, case, args.model, model_suffix="worker_tta", step=step, unique_name=uni_name)
-    lip_teacher_model_path = settings.get_ckpt_path(args.dataset, case, args.model, model_suffix="teacher_restore", step=step-1, unique_name=uni_name)
-    teacher_model_repair_save_path = settings.get_ckpt_path(args.dataset, case, args.model, model_suffix="teacher_restore", step=step, unique_name=uni_name)
-    teacher_model_adapt_save_path = settings.get_ckpt_path(args.dataset, case, args.model, model_suffix="teacher_tta", step=step, unique_name=uni_name)
+    working_model_path = settings.get_ckpt_path(
+        args.dataset,
+        case,
+        args.model,
+        model_suffix="worker_raw",
+        step=step,
+        unique_name=uni_name,
+    )  # model_paths["working_model_path"]
+    working_model_repair_save_path = settings.get_ckpt_path(
+        args.dataset,
+        case,
+        args.model,
+        model_suffix="worker_restore",
+        step=step,
+        unique_name=uni_name,
+    )
+    working_model_adapt_save_path = settings.get_ckpt_path(
+        args.dataset,
+        case,
+        args.model,
+        model_suffix="worker_tta",
+        step=step,
+        unique_name=uni_name,
+    )
+    lip_teacher_model_path = settings.get_ckpt_path(
+        args.dataset,
+        case,
+        args.model,
+        model_suffix="teacher_restore",
+        step=step - 1,
+        unique_name=uni_name,
+    )
+    teacher_model_repair_save_path = settings.get_ckpt_path(
+        args.dataset,
+        case,
+        args.model,
+        model_suffix="teacher_restore",
+        step=step,
+        unique_name=uni_name,
+    )
+    teacher_model_adapt_save_path = settings.get_ckpt_path(
+        args.dataset,
+        case,
+        args.model,
+        model_suffix="teacher_tta",
+        step=step,
+        unique_name=uni_name,
+    )
 
     mean, std = None, None
     # if args.dataset == "cifar-10":
@@ -353,7 +444,9 @@ def execute(args):
     # features = backbone.fc.in_features
     # backbone = nn.Sequential(*list(backbone.children())[:-1], nn.Flatten())
     # lip_teacher_model = SimpleLipNet(backbone, features, num_classes, spectral_norm=spec_norm)
-    lip_teacher_model = ClassifierWrapper(backbone, num_classes, spectral_norm=spec_norm)
+    lip_teacher_model = ClassifierWrapper(
+        backbone, num_classes, spectral_norm=spec_norm
+    )
     # lip_teacher_model.to(device)
 
     # 根据用户选择的优化器初始化
@@ -387,7 +480,7 @@ def execute(args):
         if os.path.exists(lip_teacher_model_path):
             checkpoint = torch.load(lip_teacher_model_path)
             lip_teacher_model.load_state_dict(checkpoint, strict=False)
-            print('load teacher model from :', lip_teacher_model_path)
+            print("load teacher model from :", lip_teacher_model_path)
         else:
             # t0 的情况下，使用D0数据重新训练 lip_teacher model
             print(
@@ -395,8 +488,18 @@ def execute(args):
                 % lip_teacher_model_path
             )
 
-            train_teacher_model(args, 0, num_classes, lip_teacher_model, teacher_opt, teacher_lr_scheduler,
-                                teacher_criterion, lip_teacher_model_path, test_dataloader=None, test_per_it=1)
+            train_teacher_model(
+                args,
+                0,
+                num_classes,
+                lip_teacher_model,
+                teacher_opt,
+                teacher_lr_scheduler,
+                teacher_criterion,
+                lip_teacher_model_path,
+                test_dataloader=None,
+                test_per_it=1,
+            )
 
         # 3. 迭代修复过程
         # (1) 测试修复前 Dts 在 Mp 的表现
@@ -422,12 +525,29 @@ def execute(args):
         conf_data, conf_labels = None, None
         for i in range(repair_iter_num):
             print("-----------restore iterate %d ----------------------" % i)
-            conf_data, conf_labels = iterate_repair_model(working_model, working_opt, working_lr_scheduler,
-                                                          working_criterion, working_model_repair_save_path,
-                                                          lip_teacher_model, teacher_opt, teacher_lr_scheduler,
-                                                          teacher_criterion, teacher_model_repair_save_path, inc_data,
-                                                          inc_labels, inc_dataloader, aux_data, aux_labels,
-                                                          aux_dataloader, num_classes, mean, std, device, args)
+            conf_data, conf_labels = iterate_repair_model(
+                working_model,
+                working_opt,
+                working_lr_scheduler,
+                working_criterion,
+                working_model_repair_save_path,
+                lip_teacher_model,
+                teacher_opt,
+                teacher_lr_scheduler,
+                teacher_criterion,
+                teacher_model_repair_save_path,
+                inc_data,
+                inc_labels,
+                inc_dataloader,
+                aux_data,
+                aux_labels,
+                aux_dataloader,
+                num_classes,
+                mean,
+                std,
+                device,
+                args,
+            )
 
         np.save(conf_data_path, conf_data)
         np.save(conf_label_path, conf_labels)
@@ -469,9 +589,14 @@ def execute(args):
 
     if tta_only is not None:
         if tta_only == 0:
-            lip_teacher_model_path = settings.get_ckpt_path(args.dataset, case, args.model,
-                                                            model_suffix="teacher_restore", step=step,
-                                                            unique_name=uni_name)
+            lip_teacher_model_path = settings.get_ckpt_path(
+                args.dataset,
+                case,
+                args.model,
+                model_suffix="teacher_restore",
+                step=step,
+                unique_name=uni_name,
+            )
             checkpoint = torch.load(lip_teacher_model_path)
             lip_teacher_model.load_state_dict(checkpoint, strict=False)
 
@@ -492,23 +617,35 @@ def execute(args):
             print(
                 "---------------------working model test before------------------------------"
             )
-            model_test(
-                test_dataloader, working_model, device=device
-            )
+            model_test(test_dataloader, working_model, device=device)
             print(
                 "---------------------teacher model test before------------------------------"
             )
-            model_test(
-                test_dataloader, lip_teacher_model, device=device
-            )
+            model_test(test_dataloader, lip_teacher_model, device=device)
 
     # (2) 迭代测试数据适应过程：根据 混合的Dts 迭代 Mp 和 Mt
     for i in range(adapt_iter_num):
         print("-----------tta iterate %d ----------------------" % i)
-        iterate_adapt_model(working_model, working_opt, working_lr_scheduler, working_criterion,
-                            working_model_adapt_save_path, lip_teacher_model, teacher_opt, teacher_lr_scheduler,
-                            teacher_criterion, teacher_model_adapt_save_path, aug_data, aug_labels, test_data,
-                            test_dataloader, mean, std, device, args)
+        iterate_adapt_model(
+            working_model,
+            working_opt,
+            working_lr_scheduler,
+            working_criterion,
+            working_model_adapt_save_path,
+            lip_teacher_model,
+            teacher_opt,
+            teacher_lr_scheduler,
+            teacher_criterion,
+            teacher_model_adapt_save_path,
+            aug_data,
+            aug_labels,
+            test_data,
+            test_dataloader,
+            mean,
+            std,
+            device,
+            args,
+        )
 
     # 6. 测试适应后 Dts 在 Mp 的表现
     working_model_after_adapt = model_test(
