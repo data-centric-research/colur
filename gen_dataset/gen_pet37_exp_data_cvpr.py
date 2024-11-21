@@ -13,36 +13,32 @@ from gen_dataset.split_dataset import split_data
 
 conference_name = "cvpr"
 
+
 def load_classes_from_file(file_path):
-    """从文件中读取类别列表"""
+    """read class list from file"""
     with open(file_path, "r") as f:
         classes = [line.strip() for line in f.readlines()]
     return classes
 
 
 def load_pet37_superclass_mapping(file_path):
-    """从JSON文件中加载 Oxford-Pets 的类别映射"""
+    """Load category mapping for Oxford-Pets from a JSON file"""
     with open(file_path, "r") as f:
         pet37_superclass_to_child = json.load(f)
     return pet37_superclass_to_child
 
 
 def build_asymmetric_mapping(superclass_mapping, classes, rng):
-    """构建非对称标签映射，确保标签替换为同superclass内的其他类"""
     child_to_superclass_mapping = {}
 
-    # 构建child class到superclass的反向映射
     for superclass, child_classes in superclass_mapping.items():
         for child_class in child_classes:
             child_to_superclass_mapping[child_class] = (superclass, child_classes)
 
-    # 构建非对称映射表
     asymmetric_mapping = {}
     for class_name in classes:
-        # 获取该类别所属的大类（superclass）以及该大类中的所有类别
         if class_name in child_to_superclass_mapping:
             superclass, child_classes = child_to_superclass_mapping[class_name]
-            # 在同一superclass中随机选择一个不同的类别作为替换
             available_classes = [c for c in child_classes if c != class_name]
             if available_classes:
                 new_class = rng.choice(available_classes)
@@ -64,7 +60,6 @@ def create_pet37_npy_files(
     weights = torchvision.models.ResNet18_Weights.DEFAULT
     data_transform = transforms.Compose([weights.transforms()])
 
-    # 加载 PET-37 数据集
     train_dataset = datasets.OxfordIIITPet(
         root=data_dir, download=True, transform=data_transform
     )
@@ -72,7 +67,7 @@ def create_pet37_npy_files(
         root=data_dir, split="test", download=True, transform=data_transform
     )
 
-    print("划分训练集...")
+    print("split training dataset...")
     dataset_name = "pet-37"
     num_classes = 37
     D_inc_data, D_inc_labels = split_data(
@@ -97,9 +92,7 @@ def create_pet37_npy_files(
         )
 
     num_noisy_samples = int(len(D_inc_labels) * noise_ratio)
-    noisy_indices = rng.choice(
-        len(D_inc_labels), num_noisy_samples, replace=False
-    )
+    noisy_indices = rng.choice(len(D_inc_labels), num_noisy_samples, replace=False)
     noisy_sel = np.zeros(len(D_inc_labels), dtype=np.bool_)
     noisy_sel[noisy_indices] = True
 
@@ -129,7 +122,6 @@ def create_pet37_npy_files(
     )
     os.makedirs(save_path, exist_ok=True)
 
-
     D_1_minus_data_path = os.path.join(save_path, "train_clean_data.npy")
     D_1_minus_labels_path = os.path.join(save_path, "train_clean_label.npy")
     np.save(D_1_minus_data_path, np.array(D_normal_data))
@@ -142,7 +134,7 @@ def create_pet37_npy_files(
     np.save(D_1_plus_labels_path, np.array(D_noisy_labels))
     np.save(D_1_plus_true_labels_path, np.array(D_noisy_true_labels))
 
-    print("D_0、D_1_minus 和 D_1_plus 数据集已生成并保存。")
+    print("D_0, D_1_minus, and D_1_plus datasets have been generated and saved.")
 
 
 def main():
@@ -156,36 +148,36 @@ def main():
         "--data_dir",
         type=str,
         default="./data/pet-37/normal/",
-        help="原始 PET-37 数据集的目录",
+        help="Directory of the original PET-37 dataset",
     )
     parser.add_argument(
         "--gen_dir",
         type=str,
         default="./data/pet-37/gen",
-        help="生成数据集的保存目录",
+        help="Directory to save the generated datasets",
     )
     parser.add_argument(
         "--dataset_name",
         type=str,
         choices=["pet-37"],
         default="pet-37",
-        help="数据集仅支持：'pet-37'",
+        help="Dataset only supports: 'pet-37'",
     )
     parser.add_argument(
         "--split_ratio",
         type=float,
         default=0.6,
-        help="训练集划分比例（默认 0.6）",
+        help="Training set split ratio (default 0.6)",
     )
     parser.add_argument(
         "--noise_type",
         type=str,
         choices=["symmetric", "asymmetric"],
         default="symmetric",
-        help="标签器歪差类型：'symmetric' 或 'asymmetric'",
+        help="Labeler bias type: 'symmetric' or 'asymmetric'",
     )
     parser.add_argument(
-        "--noise_ratio", type=float, default=0.25, help="噪音比例（默认 0.25）"
+        "--noise_ratio", type=float, default=0.25, help="Noise ratio (default 0.25)"
     )
 
     args = parser.parse_args()

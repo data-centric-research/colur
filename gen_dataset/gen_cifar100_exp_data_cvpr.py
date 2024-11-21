@@ -13,43 +13,43 @@ conference_name = "cvpr"
 
 
 def load_classes_from_file(file_path):
-    """从文件中读取类别列表"""
+    """read class list from file"""
     with open(file_path, "r") as f:
         classes = [line.strip() for line in f.readlines()]
     return classes
 
 
 def load_cifar100_superclass_mapping(file_path):
-    """从JSON文件中加载 CIFAR-100 的 superclass 与 child class 的映射"""
+    """Load the superclass and child class mapping of CIFAR-100 from a JSON file"""
     with open(file_path, "r") as f:
         cifar100_superclass_to_child = json.load(f)
     return cifar100_superclass_to_child
 
 
 def build_asymmetric_mapping(superclass_mapping, classes, rng):
-    """构建非对称标签映射，确保标签替换为同superclass内的其他类"""
+    """Build asymmetric label mapping to ensure labels are replaced with other classes within the same superclass"""
     child_to_superclass_mapping = {}
 
-    # 构建child class到superclass的反向映射
+    # Build the reverse mapping from child class to superclass
     for superclass, child_classes in superclass_mapping.items():
         for child_class in child_classes:
             child_to_superclass_mapping[child_class] = (superclass, child_classes)
 
-    # 构建非对称映射表
+    # Build the asymmetric mapping table
     asymmetric_mapping = {}
 
     for class_name in classes:
-        # 获取该类别所属的大类（superclass）以及该大类中的所有类别
+        # Get the superclass of the category and all categories within that superclass
         if class_name in child_to_superclass_mapping:
             superclass, child_classes = child_to_superclass_mapping[class_name]
-            # 在同一superclass中随机选择一个不同的类别作为替换
+            # Randomly select a different category within the same superclass as the replacement
             available_classes = [c for c in child_classes if c != class_name]
             if available_classes:
                 new_class = rng.choice(available_classes)
                 asymmetric_mapping[class_name] = new_class
             else:
                 asymmetric_mapping[class_name] = (
-                    class_name  # 如果没有其他类别，则保持原标签不变
+                    class_name# If there are no other categories, keep the original label unchanged
                 )
     return asymmetric_mapping
 
@@ -79,7 +79,7 @@ def create_cifar100_npy_files(
 
     case = settings.get_case(noise_ratio, noise_type)
 
-    print("划分训练集...")
+    print("split training dataset...")
     dataset_name = "cifar-100"
     num_classes = 100
     D_inc_data, D_inc_labels = split_data(
@@ -106,9 +106,7 @@ def create_cifar100_npy_files(
         )
 
     num_noisy_samples = int(len(D_inc_labels) * noise_ratio)
-    noisy_indices = rng.choice(
-        len(D_inc_labels), num_noisy_samples, replace=False
-    )
+    noisy_indices = rng.choice(len(D_inc_labels), num_noisy_samples, replace=False)
     noisy_sel = np.zeros(len(D_inc_labels), dtype=np.bool_)
     noisy_sel[noisy_indices] = True
 
@@ -145,7 +143,7 @@ def create_cifar100_npy_files(
     np.save(D_1_plus_labels_path, np.array(D_noisy_labels))
     np.save(D_1_plus_true_labels_path, np.array(D_noisy_true_labels))
 
-    print("D_0、D_1_minus 和 D_1_plus 数据集已生成并保存。")
+    print("D_0, D_1_minus, and D_1_plus datasets have been generated and saved.")
 
 
 def main():
@@ -159,36 +157,36 @@ def main():
         "--data_dir",
         type=str,
         default="./data/cifar-100/normal",
-        help="原始 CIFAR-100 数据集的目录",
+        help="Directory of the original CIFAR-100 dataset",
     )
     parser.add_argument(
         "--gen_dir",
         type=str,
         default="./data/cifar-100/gen/",
-        help="生成数据集的保存目录",
+        help="Directory to save the generated datasets",
     )
     parser.add_argument(
         "--dataset_name",
         type=str,
         choices=["cifar-100"],
         default="cifar-100",
-        help="数据集仅支持：'cifar-100'",
+        help="Dataset only supports: 'cifar-100'",
     )
     parser.add_argument(
         "--noise_type",
         type=str,
         choices=["asymmetric"],
         default="asymmetric",
-        help="标签噪声类型：目前仅支持 'asymmetric'",
+        help="Label noise type: currently only supports 'asymmetric'",
     )
     parser.add_argument(
         "--split_ratio",
         type=float,
         default=0.6,
-        help="训练集划分比例（默认 0.6）",
+        help="Training set split ratio (default 0.6)",
     )
     parser.add_argument(
-        "--noise_ratio", type=float, default=0.25, help="噪声比例（默认 0.25）"
+        "--noise_ratio", type=float, default=0.25, help="Noise ratio (default 0.25)"
     )
 
     args = parser.parse_args()

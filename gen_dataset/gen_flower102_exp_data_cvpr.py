@@ -47,21 +47,7 @@ def create_flower102_npy_files(
     dataset_name = "flower-102"
     num_classes = 102
 
-    # # Convert train dataset to numpy format
-    # train_data = [train_dataset[i][0].numpy() for i in range(len(train_dataset))]
-    # train_labels = [train_dataset[i][1] for i in range(len(train_dataset))]
-    # train_data = np.array(train_data)
-    # train_labels = np.array(train_labels)
-
-    # # Split training data by class
-    # class_data = split_by_class(train_data, train_labels, num_classes)
-
-    # Create class-balanced D_0 and D_inc datasets
-    # D_0_data, D_0_labels, D_inc_data, D_inc_labels = sample_class_balanced_data(
-    #     class_data, split_ratio
-    # )
-    
-    print(f"class:",num_classes)
+    print(f"class:", num_classes)
 
     D_inc_data, D_inc_labels = split_data(
         dataset_name, train_dataset, test_dataset, num_classes, split_ratio
@@ -103,7 +89,6 @@ def create_flower102_npy_files(
     np.save(D_1_plus_labels_path, np.array(D_noisy_labels))
     np.save(D_1_plus_true_labels_path, np.array(D_noisy_true_labels))
 
-    # 定义文件保存路径的字典，以减少冗余代码
     save_paths = {
         "aux_data": os.path.join(gen_dir, "aux_data.npy"),
         "aux_label": os.path.join(gen_dir, "aux_label.npy"),
@@ -117,17 +102,6 @@ def create_flower102_npy_files(
         "test_label": os.path.join(gen_dir, "test_label.npy"),
     }
 
-    # 保存重放数据集D_a，如果生成失败则保留为空
-    # try:
-    #     D_a_data, D_a_labels = sample_replay_data(
-    #         D_0_data, D_0_labels, replay_ratio=0.1, num_classes=num_classes
-    #     )
-    #     np.save(save_paths["aux_data"], D_a_data)
-    #     np.save(save_paths["aux_label"], D_a_labels)
-    # except ValueError as e:
-    #     print(f"Warning: {e}. No replay data generated.")
-
-    # 将数据保存到npy文件
     data_to_save = {
         "inc_data": D_inc_data,
         "inc_label": D_inc_labels,
@@ -137,13 +111,11 @@ def create_flower102_npy_files(
         # "train_label": train_labels,
     }
 
-    # 加载测试数据集并保存
     test_data = np.array([test_dataset[i][0].numpy() for i in range(len(test_dataset))])
     test_labels = np.array([test_dataset[i][1] for i in range(len(test_dataset))])
     data_to_save["test_data"] = test_data
     data_to_save["test_label"] = test_labels
 
-    # 将每个数据项保存到对应路径
     for key, data in data_to_save.items():
         np.save(save_paths[key], data)
 

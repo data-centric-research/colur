@@ -40,12 +40,10 @@ class BaseDataset(Dataset):
         return (self.transform(img) if self.transform else img), self.targets[idx]
 
 
-# 预处理并保存数据到指定目录
 def preprocess_and_save_data(dataset, file_path):
     print(f"Preprocessing and saving data to {file_path}...")
     preprocessed_data = []
 
-    # 对数据集中的每张图片进行预处理
     for sample in tqdm(dataset.imgs):
         img_path = sample[0]
         label = sample[1]
@@ -53,104 +51,14 @@ def preprocess_and_save_data(dataset, file_path):
         img_tensor = transforms.ToTensor()(img)  # 将图片转为张量
         preprocessed_data.append((img_tensor, label))
 
-    # 保存为 .pt 文件
     torch.save(preprocessed_data, file_path)
     print(f"Data saved to {file_path}.")
     return preprocessed_data
 
 
-# 从缓存文件加载数据，并使用 weights_only=True 消除警告
 def load_preprocessed_data(file_path):
     print(f"Loading preprocessed data from {file_path}...")
     return torch.load(file_path, weights_only=True)
-
-
-# 修改后的 TinyImageNetDataset 类，缓存文件保存到指定目录
-class TinyImageNetDataset(Dataset):
-    def __init__(
-        self,
-        image_folder_set,
-        cache_file,
-        norm_trans=None,
-        start=0,
-        end=-1,
-    ):
-        self.cache_file = cache_file  # 缓存文件路径应由调用方传入
-        self.norm_trans = norm_trans
-
-        # 检查缓存文件是否存在
-        if os.path.exists(self.cache_file):
-            # 如果缓存文件存在，加载预处理后的数据
-            self.data = load_preprocessed_data(self.cache_file)
-        else:
-            # 否则预处理数据并保存到缓存文件
-            self.imgs = image_folder_set.imgs[start:end]
-            self.data = preprocess_and_save_data(self, self.cache_file)
-
-    def __len__(self):
-        return len(self.data)
-
-    def __getitem__(self, idx):
-        img, label = self.data[idx]
-        if self.norm_trans:
-            img = self.norm_trans(img)  # 进行归一化等转换
-        return img, label
-
-
-class TinyImageNet:
-    """
-    TinyImageNet dataset loader.
-    """
-
-    def __init__(self, data_dir, normalize=False):
-        self.data_dir = data_dir
-        self.norm_layer = (
-            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-            if normalize
-            else None
-        )
-        self.tr_train = transforms.Compose(
-            [transforms.RandomCrop(64, padding=4), transforms.RandomHorizontalFlip()]
-        )
-        self.tr_test = transforms.Compose(
-            []
-        )  # You can add test-time transformations here
-        self.train_path = os.path.join(self.data_dir, "train/")
-        self.val_path = os.path.join(self.data_dir, "val/")
-        self.test_path = os.path.join(self.data_dir, "test/")
-        self._organize_val_test()
-
-    def _organize_val_test(self):
-        if os.path.exists(os.path.join(self.val_path, "images")):
-            if os.path.exists(self.test_path):
-                os.rename(self.test_path, os.path.join(self.data_dir, "test_original"))
-                os.mkdir(self.test_path)
-            val_dict = {
-                line.split("\t")[0]: line.split("\t")[1]
-                for line in open(
-                    os.path.join(self.val_path, "val_annotations.txt")
-                ).readlines()
-            }
-            paths = glob.glob(os.path.join(self.val_path, "images/*"))
-            for path in paths:
-                folder = val_dict[path.split("/")[-1]]
-                dest_dir = os.path.join(
-                    (
-                        self.test_path
-                        if len(
-                            glob.glob(
-                                os.path.join(self.val_path, folder, "images", "*")
-                            )
-                        )
-                        >= 25
-                        else self.val_path
-                    ),
-                    folder,
-                    "images",
-                )
-                os.makedirs(dest_dir, exist_ok=True)
-                move(path, os.path.join(dest_dir, os.path.basename(path)))
-            os.rmdir(os.path.join(self.val_path, "images"))
 
 
 def create_dataloaders(
@@ -280,9 +188,7 @@ def get_flowers_train_or_val(root_dir: str, split: str):
     )
 
 
-# 获取 Flowers102 数据集
 def get_flowers_102_dataset(root_dir: str):
-    # 加载训练集 (我们使用 'test' 作为训练集并应用数据增强)
     flowers_train_dataset = torchvision.datasets.Flowers102(
         root=root_dir,
         split="test",
@@ -308,13 +214,10 @@ def get_flowers_102_dataset(root_dir: str):
 def Flowers102_dataloaders(
     batch_size=128, data_dir="data/flowers-102", num_workers=2, seed=1
 ):
-    # 获取训练集和测试集
     train_set, val_set, test_set = get_flowers_102_dataset(data_dir)
 
-    # 打印数据集大小
     print(f"Training set size: {len(train_set)}, Test set size: {len(test_set)}")
 
-    # 创建 DataLoader
     train_loader = DataLoader(
         train_set, batch_size=batch_size, shuffle=True, num_workers=num_workers
     )
@@ -332,19 +235,16 @@ def tinyImageNet_dataloaders(
     batch_size=128,
     data_dir="data/tiny-imagenet-200",
     num_workers=2,
-    pin_memory=True,  # 如果使用GPU，开启pin_memory
+    pin_memory=True,
     seed=1,
     normalize=False,
 ):
-    # 创建TinyImageNet实例，并直接传递data_dir参数
     tiny_imagenet = TinyImageNet(data_dir=data_dir, normalize=normalize)
 
-    # 定义缓存文件路径，保存到data_dir下
     train_cache_file = os.path.join(data_dir, "tiny_imagenet_train_cache.pt")
     val_cache_file = os.path.join(data_dir, "tiny_imagenet_val_cache.pt")
     test_cache_file = os.path.join(data_dir, "tiny_imagenet_test_cache.pt")
 
-    # 加载训练集
     train_set = ImageFolder(tiny_imagenet.train_path, transform=tiny_imagenet.tr_train)
     train_loader = DataLoader(
         TinyImageNetDataset(
@@ -353,13 +253,10 @@ def tinyImageNet_dataloaders(
         batch_size=batch_size,
         shuffle=True,
         num_workers=num_workers,
-        pin_memory=(
-            pin_memory if torch.cuda.is_available() else False
-        ),  # 仅在有GPU时启用 pin_memory
+        pin_memory=(pin_memory if torch.cuda.is_available() else False),
         worker_init_fn=lambda _: np.random.seed(seed),
     )
 
-    # 加载测试集
     test_set = ImageFolder(tiny_imagenet.test_path, transform=tiny_imagenet.tr_test)
     test_loader = DataLoader(
         TinyImageNetDataset(
@@ -372,7 +269,6 @@ def tinyImageNet_dataloaders(
         worker_init_fn=lambda _: np.random.seed(seed),
     )
 
-    # 加载验证集
     val_set = ImageFolder(tiny_imagenet.val_path, transform=tiny_imagenet.tr_test)
     val_loader = DataLoader(
         TinyImageNetDataset(

@@ -104,8 +104,8 @@ def iterate_repair_model(
 ):
     aux_labels_onehot = np.eye(num_classes)[aux_labels]
 
-    # 1. 通过 Mt 获取 D_mix=Da+Ds+Dc,  Train Pp=Mp(Xp_mix), Loss=CrossEntropy(Pp, Yp_mix)
-    # (1) 获取Ds: 通过 Yp=Mp(Xtr), Yt=Mt(Xtr) 两个模型预测分类标签，其中Yp=Yt=Ytr的数据为Ds, Ys为预测相同的标签
+    # 1. Get D_mix=Da+Ds+Dc using Mt, Train Pp=Mp(Xp_mix), Loss=CrossEntropy(Pp, Yp_mix)
+    # (1) Get Ds: By predicting classification labels with Yp=Mp(Xtr) and Yt=Mt(Xtr) from both models, the data where Yp=Yt=Ytr is Ds, and Ys are the labels with the same predictions
     working_inc_predicts, working_inc_probs = model_forward(
         inc_dataloader, working_model
     )
@@ -120,9 +120,8 @@ def iterate_repair_model(
     selected_probs = teacher_inc_probs[select_idx]  # + working_inc_probs[select_idx])/2
     selected_embeddings = teacher_inc_embeddings[select_idx]
 
-    # (2) 获取Dc: 通过 Mt(Xa+Xs) 计算class embedding centroids (i.e. Class mean): E_centroid
-    # 通过 Mt(Das)获取 E_centroid(Das=Da+Ds)
-    # 获取 Embedding_disa(D_disa=Dtr-D_agree) 距离离每个类c的中心 E_centroid[class=c]最近的Top 10% 的数据为 Dc (通过Lipschitz性质预测的伪标签)
+    # (2) Get Dc: Compute class embedding centroids (i.e., class mean) E_centroid using Mt(Xa+Xs)
+    # Obtain E_centroid by running Mt on Das (Das=Da+Ds)
     aux_predicts, aux_probs, aux_embeddings = model_forward(
         aux_dataloader, teacher_model, output_embedding=True
     )
@@ -198,7 +197,7 @@ def iterate_repair_model(
         save_path=working_model_save_path,
     )
 
-    # 2. 使用 D_mix=Da+Ds+Dc(重新mix_up), Train Pt=Mt(Xp_mix), Loss=CrossEntropy(Pt, Yt_mix)
+    # 2. Use D_mix=Da+Ds+Dc (re-mix_up), Train Pt=Mt(Xp_mix), Loss=CrossEntropy(Pt, Yt_mix)
     # teacher_mix_dataloader_shuffled = mix_up_dataloader(
     #     mix_data, mix_labels_onehot, mix_data, mix_labels_onehot,
     #     mean=mean, std=std, batch_size=args.batch_size, transform=True)
@@ -215,7 +214,7 @@ def iterate_repair_model(
         save_path=teacher_model_save_path,
     )
 
-    # 3. 获取Dconf{Xs, Ys} 用与adapt: Dconf从Ds中top10% 数据(根据Ys_prob排序)
+    # 3. Get Dconf{Xs, Ys} for adaptation: Dconf consists of the top 10% of data from Ds (sorted by Ys_prob)
     select_probs_max = np.max(selected_probs, axis=-1)  # [N]
     sample_size = len(selected_probs) // 10
     sample_idx = np.argpartition(select_probs_max, -sample_size)[-sample_size:]
@@ -245,11 +244,11 @@ def iterate_adapt_model(
     device,
     args,
 ):
-    # 1. 构造Dts融合数据集 Dt_mix: (Dts, D_aug), 进行mix up
-    # (1) 构造 Dts: Dt={Xts, Pts}, Pt = Mt(Xts)
+    # 1. Construct the fused dataset Dt_mix: (Dts, D_aug), perform mix up
+    # (1) Construct Dts: Dt={Xts, Pts}, Pt = Mt(Xts)
     test_predicts, test_probs = model_forward(test_dataloader, teacher_model)
 
-    # (2) 构造 Dt_mix: Dt_mix = mix_up(Dts, D_aug), Xt_mix = {a*Xts+(1-a)*X_aug}, Yt_mix = {a*Pts+(1-a)*Y_aug}
+    # (2) Construct Dt_mix: Dt_mix = mix_up(Dts, D_aug), Xt_mix = {a*Xts+(1-a)*X_aug}, Yt_mix = {a*Pts+(1-a)*Y_aug}
     test_probs_sharpen = sharpen(test_probs)
     ts_mixed_dataloader_shuffled = mix_up_dataloader(
         test_data,
@@ -276,11 +275,11 @@ def iterate_adapt_model(
         save_path=teacher_model_save_path,
     )
 
-    # 3. 重新构造 Dts融合数据集 Dp_mix
-    # (1) 构造 Dts: Dt={Xts, Pts}, Pt = Mt(Xts)
+    # 3. Reconstruct the fused dataset Dp_mix
+    # (1) Construct Dts: Dt={Xts, Pts}, Pt = Mt(Xts)
     test_predicts_new, test_probs_new = model_forward(test_dataloader, teacher_model)
 
-    # (2) 构造 Dp_mix: Dp_mix = mix_up(Dts, D_aug), Xp_mix = {a*Xts+(1-a)*X_aug}, Yt_mix = {a*Pts+(1-a)*Y_aug}
+    # (2) Construct Dp_mix: Dp_mix = mix_up(Dts, D_aug), Xp_mix = {a*Xts+(1-a)*X_aug}, Yt_mix = {a*Pts+(1-a)*Y_aug}
     test_probs_new_sharpen = sharpen(test_probs_new)
     ts_mixed_dataloader_shuffled_new = mix_up_dataloader(
         test_data,
@@ -337,7 +336,7 @@ def sharpen(prob_max, T=1, axis=-1):
 
 
 def execute(args):
-    # 1. 获取公共参数
+    # 1. get public parameters
     num_classes = settings.num_classes_dict[args.dataset]
     kwargs = parse_kwargs(args.kwargs)
     case = settings.get_case(args.noise_ratio, args.noise_type, args.balanced)
@@ -411,16 +410,6 @@ def execute(args):
     )
 
     mean, std = None, None
-    # if args.dataset == "cifar-10":
-    #     mean = cifar10_config["mean"]
-    #     std = cifar10_config["std"]
-    # elif args.dataset == "cifar-100":
-    #     mean = cifar100_config["mean"]
-    #     std = cifar100_config["std"]
-    # elif args.dataset == "food-101":
-    #     mean = food101_config["mean"]
-    #     std = food101_config["std"]
-
     working_model, lip_teacher_model = None, None
 
     # 2. load model
@@ -439,7 +428,7 @@ def execute(args):
 
     working_criterion = nn.CrossEntropyLoss()
 
-    # (2) load lip_teacher model, t0的情况重新训练
+    # (2) load lip_teacher model
     backbone = load_custom_model(args.model, num_classes)
     # features = backbone.fc.in_features
     # backbone = nn.Sequential(*list(backbone.children())[:-1], nn.Flatten())
@@ -449,7 +438,7 @@ def execute(args):
     )
     # lip_teacher_model.to(device)
 
-    # 根据用户选择的优化器初始化
+    # Initialize based on the user-selected optimizer
     teacher_opt, teacher_lr_scheduler = create_optimizer_scheduler(
         optimizer_type,
         lip_teacher_model.parameters(),
@@ -482,7 +471,7 @@ def execute(args):
             lip_teacher_model.load_state_dict(checkpoint, strict=False)
             print("load teacher model from :", lip_teacher_model_path)
         else:
-            # t0 的情况下，使用D0数据重新训练 lip_teacher model
+            # In the case of t0, retrain the lip_teacher model using D0 data
             print(
                 "Teacher model pth: %s not exist, only train T0, if not T0 then stop!"
                 % lip_teacher_model_path
@@ -501,8 +490,8 @@ def execute(args):
                 test_per_it=1,
             )
 
-        # 3. 迭代修复过程
-        # (1) 测试修复前 Dts 在 Mp 的表现
+        # 3. Iterative repair process
+        # (1) Test the performance of Dts on Mp before repair
         print(
             "---------------------working model test before------------------------------"
         )
@@ -516,12 +505,12 @@ def execute(args):
             test_dataloader, lip_teacher_model, device=device
         )
 
-        # (2) 构造修复过程数据集: Dtr、 Da、Dts
+        # (2) Construct datasets: Dtr、 Da、Dts
         inc_data, inc_labels, inc_dataloader = get_dataset_loader(
             args.dataset, "train", case, step, mean, std, args.batch_size, shuffle=False
         )
 
-        # (3) 迭代修复过程：根据 Dtr 迭代 Mp 、 Mt
+        # (3) Iterative repair process: Update Mp and Mt based on Dtr
         conf_data, conf_labels = None, None
         for i in range(repair_iter_num):
             print("-----------restore iterate %d ----------------------" % i)
@@ -552,7 +541,7 @@ def execute(args):
         np.save(conf_data_path, conf_data)
         np.save(conf_label_path, conf_labels)
 
-        # 4. 测试修复后 Dts 在 Mp 的表现
+        # 4. Test the performance of Dts on Mp after repair
         working_model_after_repair = model_test(
             test_dataloader, working_model, device=device
         )
@@ -581,8 +570,8 @@ def execute(args):
         )
         print(teacher_model_after_repair)
 
-    # 5. 迭代测试数据适应过程
-    # (1) 构造适应过程数据：Dts, D_aug:  = Da + Dconf
+    # 5. Iterative data adaptation process
+    # (1) Construct adaptation data: Dts, D_aug = Da + Dconf
     aux_labels_onehot = np.eye(num_classes)[aux_labels]
     aug_data = aux_data
     aug_labels = aux_labels_onehot
@@ -623,7 +612,7 @@ def execute(args):
             )
             model_test(test_dataloader, lip_teacher_model, device=device)
 
-    # (2) 迭代测试数据适应过程：根据 混合的Dts 迭代 Mp 和 Mt
+    # (2) Iterative data adaptation process: Update Mp and Mt based on the mixed Dts
     for i in range(adapt_iter_num):
         print("-----------tta iterate %d ----------------------" % i)
         iterate_adapt_model(
@@ -647,7 +636,7 @@ def execute(args):
             args,
         )
 
-    # 6. 测试适应后 Dts 在 Mp 的表现
+    # 6. Test the performance of Dts on Mp after adaptation
     working_model_after_adapt = model_test(
         test_dataloader, working_model, device=device
     )

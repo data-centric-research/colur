@@ -4,7 +4,7 @@ import argparse
 # from run_experiment import run_experiment
 
 
-# 自定义检查函数
+# Custom check function
 def check_positive(value):
     ivalue = float(value)
     if ivalue <= 0:
@@ -19,7 +19,7 @@ def check_fraction(value):
     return fvalue
 
 
-# 解析 classes 参数（支持 0-9 形式）
+# Parse the classes parameter (supports 0-9 format)
 def parse_class_range(value):
     if "-" in value:
         start, end = map(int, value.split("-"))
@@ -30,15 +30,13 @@ def parse_class_range(value):
 
 def parse_kwargs(kwargs):
     """
-    将 --kwargs 中的 key=value 形式的输入解析为字典。
+    Parse the key=value form input from --kwargs into a dictionary.
     """
     parsed_kwargs = {}
     if kwargs:
         for kwarg in kwargs:
             key, value = kwarg.split("=")
-            parsed_kwargs[key] = (
-                float(value) if "." in value else int(value)
-            )  # 根据输入类型转换
+            parsed_kwargs[key] = float(value) if "." in value else int(value)
     return parsed_kwargs
 
 
@@ -48,7 +46,6 @@ def make_arg_parser(parser=None):
             description="Run experiments with different datasets, models, and conditions."
         )
 
-    # 添加参数
     parser.add_argument(
         "--dataset",
         type=str,
@@ -71,7 +68,6 @@ def make_arg_parser(parser=None):
         help="Select in (cifar-resnet18, cifar-wideresnet40, cifar-resnet50, resnet18, resnet50, resnet101, vgg19, wideresnet50)",
     )
 
-    # 在 parse_args 函数中添加 --pretrained 参数
     parser.add_argument(
         "--pretrained",
         action="store_true",
@@ -110,10 +106,9 @@ def make_arg_parser(parser=None):
         help="List of classes to remove samples from, e.g., --classes_remove 0 1 2 3 4 or 0-4",
     )
 
-    # 添加 remove_fraction 参数，用于指定删除样本的比例
     parser.add_argument(
         "--remove_fraction",
-        type=check_fraction,  # 使用自定义函数
+        type=check_fraction,
         default=0.5,
         help="Fraction of samples to remove from the selected classes, e.g., --remove_fraction 0.5 for 50%% removal (default: 0.5)",
     )
@@ -126,7 +121,6 @@ def make_arg_parser(parser=None):
         help="List of classes to add noise to, e.g., --classes_noise 5 6 7 8 9 or 5-9",
     )
 
-    # 添加 noise_type 参数，用于指定噪声类型
     parser.add_argument(
         "--noise_type",
         type=str,
@@ -139,7 +133,7 @@ def make_arg_parser(parser=None):
         "--balanced",
         default=False,
         action="store_true",
-        help="是否使用类均衡的数据划分方式。如果不指定，则使用随机划分。",
+        help="Whether to use class-balanced data splitting. If not specified, random splitting will be used.",
     )
 
     parser.add_argument(
@@ -185,7 +179,6 @@ def make_arg_parser(parser=None):
         help="Specify the GPU(s) to use, e.g., --gpu 0,1 for multi-GPU or --gpu 0 for single GPU",
     )
 
-    # 添加 batch_size 参数
     parser.add_argument(
         "--batch_size",
         type=int,
@@ -193,22 +186,20 @@ def make_arg_parser(parser=None):
         help="Batch size for training (default: 64)",
     )
 
-    # 添加 learning_rate 参数
     parser.add_argument(
         "--learning_rate",
-        type=check_positive,  # 使用自定义函数
+        type=check_positive,
         default=0.001,
         help="Learning rate for the optimizer (default: 0.001)",
     )
 
     parser.add_argument(
         "--teacher_lr_scale",
-        type=check_positive,  # 使用自定义函数
+        type=check_positive,
         default=0.2,
         help="Teacher learning rate scale",
     )
 
-    # 添加 optimizer 参数
     parser.add_argument(
         "--optimizer",
         type=str,
@@ -217,7 +208,6 @@ def make_arg_parser(parser=None):
         help="Optimizer for training weights",
     )
 
-    # 添加 momentum 参数，用于指定 SGD 优化器的动量
     parser.add_argument(
         "--momentum",
         type=check_positive,
@@ -225,7 +215,6 @@ def make_arg_parser(parser=None):
         help="Momentum for SGD optimizer (default: 0.9). Only used if optimizer is 'sgd'.",
     )
 
-    # 添加 weight_decay 参数，用于指定权重衰减
     parser.add_argument(
         "--weight_decay",
         type=check_positive,
@@ -233,7 +222,6 @@ def make_arg_parser(parser=None):
         help="Weight decay for the optimizer (default: 0.0001).",
     )
 
-    # 添加 num_epochs 参数
     parser.add_argument(
         "--num_epochs",
         type=int,
@@ -255,7 +243,6 @@ def make_arg_parser(parser=None):
         help="Number of unlearning epochs (default: 3)",
     )
 
-    # 添加 early_stopping_patience 参数
     parser.add_argument(
         "--early_stopping_patience",
         type=int,
@@ -263,7 +250,6 @@ def make_arg_parser(parser=None):
         help="Patience for early stopping (default: 10)",
     )
 
-    # 添加 early_stopping_accuracy_threshold 参数
     parser.add_argument(
         "--early_stopping_accuracy_threshold",
         type=float,
@@ -271,14 +257,12 @@ def make_arg_parser(parser=None):
         help="Accuracy threshold for early stopping (default: 0.95)",
     )
 
-    # 添加早停开关参数
     parser.add_argument(
         "--use_early_stopping",
         action="store_true",
         help="Enable early stopping if specified, otherwise train for the full number of epochs",
     )
 
-    # 修复训练的次数
     parser.add_argument(
         "--repair_iter_num",
         type=int,
@@ -286,7 +270,6 @@ def make_arg_parser(parser=None):
         help="The number of iterations to train the model",
     )
 
-    # 适应性训练的次数
     parser.add_argument(
         "--adapt_iter_num",
         type=int,
@@ -329,12 +312,10 @@ def make_arg_parser(parser=None):
         help="Mixup factor",
     )
 
-    # 捕获其他 kwargs
     parser.add_argument(
         "--kwargs", nargs="*", help="Additional key=value arguments for hyperparameters"
     )
 
-    # 捕获其他 kwargs
     parser.add_argument(
         "--model_suffix",
         type=str,
@@ -351,38 +332,30 @@ def make_arg_parser(parser=None):
     return parser
 
 
-# 命令行解析
 def parse_args():
     parser = make_arg_parser()
-    # 返回解析的参数
     return parser.parse_args()
 
 
 def main():
-    # 解析命令行参数
     args = parse_args()
 
-    # 设置 GPU 环境变量
     os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu
     print(f"Using GPU(s): {args.gpu}")
 
-    # 设置默认值为空列表，避免传递 None
     if args.classes_remove is None:
         args.classes_remove = []
     if args.classes_noise is None:
         args.classes_noise = []
 
-    # 检查组合操作的条件
     if args.condition == "all_perturbations":
         if not args.classes_remove or not args.classes_noise:
             raise ValueError(
                 "For 'all_perturbations' condition, both --classes_remove and --classes_noise must be provided."
             )
 
-    # 解析 kwargs 参数
     kwargs = parse_kwargs(args.kwargs)
 
-    # 打印用户输入的配置信息
     print(f"Running experiment with the following configuration:")
     print(f"  Dataset: {args.dataset}")
     print(f"  Model: {args.model}")

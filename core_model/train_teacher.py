@@ -63,12 +63,7 @@ if __name__ == "__main__":
         )
         if step == 0:
             save_model_path = model_p0_path
-        # else:
-        #     if os.path.exists(save_model_path):
-        #         checkpoint = torch.load(model_p0_path)
-        #         lip_teacher_model.load_state_dict(checkpoint, strict=False)
 
-        # 根据用户选择的优化器初始化
         teacher_opt, teacher_lr_scheduler = create_optimizer_scheduler(
             optimizer_type=optimizer_type,
             parameters=lip_teacher_model.parameters(),

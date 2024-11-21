@@ -14,14 +14,9 @@ class DatasetUtils:
         self.dataset_name = dataset_name
         self.dataset_paths = dataset_paths
         self.num_classes = num_classes_dict[dataset_name]
-        self.train_dataset, self.val_dataset, self.test_dataset = (
-            self.get_dataset()
-        )  # 预加载数据集
+        self.train_dataset, self.val_dataset, self.test_dataset = self.get_dataset()
 
     def get_dataset(self):
-        """
-        根据数据集名称返回相应的训练和测试数据集。
-        """
         if self.dataset_name == "cifar-10":
             train_loader, val_loader, test_loader = cifar10_dataloaders()
             train_dataset = train_loader.dataset

@@ -81,15 +81,19 @@ def load_custom_model(model_name, num_classes, load_pretrained=True, ckpt_path=N
     if model and ckpt_path:
         checkpoint = torch.load(ckpt_path)
         model.load_state_dict(checkpoint, strict=False)
-        print('load worker model from :', ckpt_path)
+        print("load worker model from :", ckpt_path)
     return model
 
 
 class ClassifierWrapper(nn.Module):
-    def __init__(self, backbone, num_classes,
-                 freeze_weights=False,
-                 bypass=False,
-                 spectral_norm=False):
+    def __init__(
+        self,
+        backbone,
+        num_classes,
+        freeze_weights=False,
+        bypass=False,
+        spectral_norm=False,
+    ):
         super(ClassifierWrapper, self).__init__()
 
         # Freezing the weights
@@ -104,7 +108,6 @@ class ClassifierWrapper(nn.Module):
         #     modules += [
         #         *[nn.ReLU(), nn.BatchNorm1d(features), nn.Linear(features, features)] * batchnorm_blocks,
         #         nn.ReLU(), nn.BatchNorm1d(features)]
-
 
         if spectral_norm:
             self.apply(self._add_spectral_norm)

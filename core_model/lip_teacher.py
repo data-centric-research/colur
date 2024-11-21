@@ -9,8 +9,14 @@ class SimpleLipNet(nn.Module):
     Implementation of Lipschitz regularized network
     """
 
-    def __init__(self, backbone, in_features, out_features,
-                 spectral_norm=True, spectral_init=False):
+    def __init__(
+        self,
+        backbone,
+        in_features,
+        out_features,
+        spectral_norm=True,
+        spectral_init=False,
+    ):
         super(SimpleLipNet, self).__init__()
 
         self.backbone = backbone
@@ -20,12 +26,12 @@ class SimpleLipNet(nn.Module):
         if spectral_init:
             self.apply(self._spectral_init)
 
-    # 使用谱归一化 (spectral_norm) 来规范化线性层和卷积层的权重
+    # Use spectral normalization to normalize the weights of linear and convolutional layers
     def _add_spectral_norm(self, m):
         if isinstance(m, (nn.Linear, nn.Conv2d)):
             torch.nn.utils.spectral_norm(m)
 
-    # 为线性层和卷积层进行 Xavier 初始化，使用 SVD 对权重进行缩放处理。
+    # Perform Xavier initialization for linear and convolutional layers, scaling the weights using SVD.
     def _spectral_init(self, m):
         if isinstance(m, nn.Linear):
             # torch.nn.init.orthogonal_(m.weight, gain=1)

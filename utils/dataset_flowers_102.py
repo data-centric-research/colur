@@ -11,16 +11,13 @@ def get_flowers_train_or_val(root_dir: str, split: str):
         split=split,
         transform=torchvision.transforms.Compose(
             [
-                # 使用预训练模型的 transforms
                 torchvision.models.VGG16_BN_Weights.IMAGENET1K_V1.transforms(),
             ]
         ),
     )
 
 
-# 获取 flowers-102 数据集
 def get_flowers_102_dataset(root_dir: str):
-    # 加载训练集 (我们使用 'test' 作为训练集)
     flowers_train_dataset = torchvision.datasets.Flowers102(
         root=root_dir,
         split="test",
@@ -35,7 +32,6 @@ def get_flowers_102_dataset(root_dir: str):
         ),
     )
 
-    # 加载测试集，合并 'train' 和 'val' 数据集
     flowers_test_dataset = ConcatDataset(
         [
             get_flowers_train_or_val(root_dir, "train"),

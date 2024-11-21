@@ -46,17 +46,17 @@ def normalize_dataset(dataset, channel_first=True, mean=None, std=None):
 
     if axes is not None:
         dataset = np.transpose(dataset, axes)
-    # [2024-10-10 Add by sunzekun]
-    # 下面的代码会引发bug，因为目前数据集都是已经经过了归一化的
-    # 此时有部分值会超出1，为1.xxx。但它不是像素值
-    # 所以会错误地触发这个判断条件，导致整体所有的值再被除了一次255.
-    # 为了避免出问题，此处直接把这行注释掉即可。
+
+    # The following code will cause a bug because the current datasets have already been normalized.
+    # At this point, some values may exceed 1, e.g., 1.xxx, but they are not pixel values.
+    # This would incorrectly trigger the condition, causing all values to be divided by 255 again.
+    # To avoid issues, simply comment out this line.
 
     # normalize
     # if (dataset[0] > 1).any():
     #     dataset = dataset / 255.
-
     # gaussian normalize
+
     if mean is not None:
         mean = np.array(mean, dtype=np.float32)
         std = np.array(std, dtype=np.float32)
@@ -81,7 +81,7 @@ class MixupDataset(Dataset):
         transforms=None,
         mean=None,
         std=None,
-        first_max=True
+        first_max=True,
     ):
         # modify shape to [N, H, W, C]
         self.data_first = data_pair[0]
@@ -123,11 +123,21 @@ class MixupDataset(Dataset):
 
 
 class NormalizeDataset(BaseTensorDataset):
-    def __init__(self, data, labels, transforms=None, output_index=False,
-                 channel_first=True, mean=None, std=None, device=None):
+    def __init__(
+        self,
+        data,
+        labels,
+        transforms=None,
+        output_index=False,
+        channel_first=True,
+        mean=None,
+        std=None,
+        device=None,
+    ):
         super().__init__(data, labels, transforms, output_index)
         self.data = normalize_dataset(data, channel_first, mean, std)
-        if device is not None: self.data = torch.as_tensor(data, device=device)
+        if device is not None:
+            self.data = torch.as_tensor(data, device=device)
 
 
 def get_dataset_loader(
@@ -150,7 +160,7 @@ def get_dataset_loader(
     num_workers=0,
 ):
     """
-    根据 loader_name 加载相应的数据集：支持增量训练 (inc)、辅助数据 (aux) 、测试数据 (test)和 D0数据集(train)
+    Load the corresponding dataset based on loader_name: supports incremental training (inc), auxiliary data (aux), test data (test), and D0 dataset (train).
     """
     if not isinstance(loader_name, (list, tuple)):
         loader_name = [loader_name]
@@ -160,14 +170,10 @@ def get_dataset_loader(
     for ld_name in loader_name:
         if data_name is None:
             data_name = f"{ld_name}_data"
-        data_path = settings.get_dataset_path(
-            dataset_name, case, data_name, step
-        )
+        data_path = settings.get_dataset_path(dataset_name, case, data_name, step)
         if label_name is None:
             label_name = f"{ld_name}_label"
-        label_path = settings.get_dataset_path(
-            dataset_name, case, label_name, step
-        )
+        label_path = settings.get_dataset_path(dataset_name, case, label_name, step)
 
         print(f"Loading {data_path}")
 
@@ -178,18 +184,26 @@ def get_dataset_loader(
     data = np.concatenate(data, axis=0)
     labels = np.concatenate(labels, axis=0)
 
-    # if loader_name == "train":
-    #     transform = True
-
     if onehot_enc:  # train label change to onehot for teacher model
         labels = np.eye(num_classes)[labels]
 
-    # 构建自定义数据集
-    dataset = NormalizeDataset(data, labels, transforms=transforms, output_index=output_index, mean=mean, std=std)
+    # Build custom dataset
+    dataset = NormalizeDataset(
+        data,
+        labels,
+        transforms=transforms,
+        output_index=output_index,
+        mean=mean,
+        std=std,
+    )
     # dataset = BaseTensorDataset(data, labels, transforms=transforms)
 
     data_loader = DataLoader(
-        dataset, batch_size=batch_size, drop_last=drop_last, shuffle=shuffle, num_workers=num_workers
+        dataset,
+        batch_size=batch_size,
+        drop_last=drop_last,
+        shuffle=shuffle,
+        num_workers=num_workers,
     )
 
     # if dataset_name == "pet-37":
@@ -221,42 +235,3 @@ def random_horiz_flip(img):
     if random.random() > 0.5:
         img = np.fliplr(img)
     return img
-
-
-if __name__ == "__main__":
-    # 假设你的 CIFAR-10 数据存储在这个目录
-    data_dir = "./data/cifar-10/noise/"
-    # data_dir = "../data/cifar-100/noise/"
-    # data_dir = "../data/tiny-imagenet-200/noise/"
-    # data_dir = "../data/flowers-102/noise/"
-    batch_size = 32
-
-    # # 测试加载增量数据集
-    # print("Loading Incremental Training Dataset (inc)")
-    # inc_dataset, inc_loader = get_dataset_loader("inc", data_dir, batch_size)
-    # print(f"Incremental Dataset Size: {len(inc_dataset)}")
-    #
-    # # 遍历一批增量数据并查看形状
-    # for images, labels in inc_loader:
-    #     print(f"Batch Image Shape: {images.shape}, Batch Label Shape: {labels.shape}")
-    #     break  # 只打印第一批
-    #
-    # # 测试加载辅助数据集
-    # print("\nLoading Auxiliary Dataset (aux)")
-    # aux_dataset, aux_loader = get_dataset_loader("aux", data_dir, batch_size)
-    # print(f"Auxiliary Dataset Size: {len(aux_dataset)}")
-    #
-    # # 遍历一批辅助数据并查看形状
-    # for images, labels in aux_loader:
-    #     print(f"Batch Image Shape: {images.shape}, Batch Label Shape: {labels.shape}")
-    #     break
-    #
-    # # 测试加载测试数据集
-    # print("\nLoading Test Dataset (test)")
-    # test_dataset, test_loader = get_dataset_loader("test", data_dir, batch_size)
-    # print(f"Test Dataset Size: {len(test_dataset)}")
-    #
-    # # 遍历一批测试数据并查看形状
-    # for images, labels in test_loader:
-    #     print(f"Batch Image Shape: {images.shape}, Batch Label Shape: {labels.shape}")
-    #     break

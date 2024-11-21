@@ -40,54 +40,48 @@ class TrainTestUtils:
         epoch,
         num_epochs,
         save_final_model_only=True,
-        **kwargs,  # 捕获额外的训练参数
+        **kwargs,
     ):
         """
         :param save_final_model_only: If True, only save the model after the final epoch.
         """
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        model = model.to(device)  # 确保模型移动到正确的设备
+        model = model.to(device)
         model.train()
 
         running_loss = 0.0
         correct = 0
         total = 0
 
-        # 提取 kwargs 中可能传递的 alpha 或其他参数
-        alpha = kwargs.get("alpha", 1.0)  # 默认值为 1.0
-        beta = kwargs.get("beta", 0.5)  # 同样处理 beta 参数
+        # Extract possible parameters such as alpha or others from kwargs
+        alpha = kwargs.get("alpha", 1.0)
+        beta = kwargs.get("beta", 0.5)
 
-        # 用 tqdm 显示训练进度条
         with tqdm(total=len(train_loader), desc=f"Epoch {epoch + 1} Training") as pbar:
             for i, (inputs, labels) in enumerate(train_loader):
-                inputs, labels = inputs.to(device), labels.to(
-                    device
-                )  # 移动数据到正确设备
-                optimizer.zero_grad()  # 清除上一步的梯度
+                inputs, labels = inputs.to(device), labels.to(device)
+                optimizer.zero_grad()
                 outputs = model(inputs)
 
-                loss = criterion(outputs, labels) * alpha  # 使用 alpha 参数调整损失函数
-                loss.backward()  # 反向传播
-                optimizer.step()  # 更新参数
+                loss = criterion(outputs, labels) * alpha
+                loss.backward()
+                optimizer.step()
 
                 running_loss += loss.item()
 
-                # 计算准确率
                 _, predicted = torch.max(outputs.data, 1)
                 total += labels.size(0)
                 correct += (predicted == labels).sum().item()
 
-                # 更新进度条显示每个 mini-batch 的损失
                 pbar.set_postfix({"Loss": f"{loss.item():.4f}"})
                 pbar.update(1)
 
-        avg_loss = running_loss / len(train_loader)  # 计算平均损失
-        accuracy = correct / total  # 计算训练集的准确率
+        avg_loss = running_loss / len(train_loader)
+        accuracy = correct / total
         print(
             f"Epoch [{epoch + 1}/{num_epochs}], Training Loss: {avg_loss:.4f}, Training Accuracy: {accuracy * 100:.2f}%"
         )
 
-        # 仅在最后一次保存模型，避免每个 epoch 都保存
         if not save_final_model_only or epoch == (num_epochs - 1):
             torch.save(
                 model.state_dict(),
@@ -102,36 +96,31 @@ class TrainTestUtils:
     def test(self, model, test_loader, condition, progress_bar=None):
         model.eval()
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        model = model.to(device)  # 确保模型移动到正确设备
+        model = model.to(device)
 
         correct = 0
         total = 0
         running_loss = 0.0
-        criterion = torch.nn.CrossEntropyLoss()  # 定义损失函数
+        criterion = torch.nn.CrossEntropyLoss()
 
-        # 用于 early stopping 机制的测试
         with torch.no_grad():
             for images, labels in test_loader:
-                images, labels = images.to(device), labels.to(
-                    device
-                )  # 移动数据到正确设备
+                images, labels = images.to(device), labels.to(device)
                 outputs = model(images)
-                loss = criterion(outputs, labels)  # 计算损失
-                running_loss += loss.item()  # 累加损失
+                loss = criterion(outputs, labels)
+                running_loss += loss.item()
 
                 _, predicted = torch.max(outputs.data, 1)
                 total += labels.size(0)
                 correct += (predicted == labels).sum().item()
 
-                # 更新测试进度条
                 if progress_bar:
                     progress_bar.update(1)
 
         accuracy = correct / total
-        avg_loss = running_loss / len(test_loader)  # 计算平均损失
+        avg_loss = running_loss / len(test_loader)
         print(f"Test Accuracy: {100 * accuracy:.2f}%, Loss: {avg_loss:.4f}")
 
-        # 保存测试结果为 JSON 文件
         result = {"accuracy": accuracy, "loss": avg_loss}
         save_dir = os.path.join(
             "results", self.model_name, self.dataset_name, condition
@@ -143,7 +132,7 @@ class TrainTestUtils:
 
         print(f"Performance saved to {save_path}")
 
-        return accuracy  # 返回准确率，以用于 early stopping 机制
+        return accuracy
 
 
 def test_model(model, test_loader, criterion, device, epoch):
@@ -164,14 +153,13 @@ def test_model(model, test_loader, criterion, device, epoch):
                 total_test += test_targets.size(0)
                 correct_test += (predicted_test == test_targets).sum().item()
 
-                # 更新进度条
                 pbar.set_postfix({"Loss": f"{loss.item():.4f}"})
                 pbar.update(1)
 
     test_loss /= len(test_loader)
     test_accuracy = 100 * correct_test / total_test
     print(f"Test Accuracy after Epoch {epoch + 1}: {test_accuracy:.2f}%")
-    return test_accuracy, test_loss  # 返回准确率，以用于 early stopping 机制
+    return test_accuracy, test_loss
 
 
 def train_model(
@@ -191,17 +179,17 @@ def train_model(
     writer=None,
 ):
     """
-    训练模型函数
-    :param model: 要训练的 ResNet 模型
-    :param data: 输入的数据集
-    :param labels: 输入的数据标签
-    :param test_data: 测试集数据
-    :param test_labels: 测试集标签
-    :param epochs: 训练的轮数
-    :param batch_size: 批次大小
-    :optimizer_type: 优化器
-    :param learning_rate: 学习率
-    :return: 训练后的模型
+    Train model function
+    :param model: The ResNet model to be trained
+    :param data: The input dataset
+    :param labels: The input data labels
+    :param test_data: The test set data
+    :param test_labels: The test set labels
+    :param epochs: The number of training epochs
+    :param batch_size: The batch size
+    :param optimizer_type: The optimizer
+    :param learning_rate: The learning rate
+    :return: The trained model
     """
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
@@ -215,7 +203,7 @@ def train_model(
         learning_rate=learning_rate,
         weight_decay=weight_decay,
         epochs=epochs,
-        eta_min=0.01 * learning_rate
+        eta_min=0.01 * learning_rate,
     )
 
     # weights = torchvision.models.ResNet18_Weights.DEFAULT
@@ -247,10 +235,8 @@ def train_model(
     )
 
     test_dataset = BaseTensorDataset(test_data, test_labels)
-    # test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
-    # 用于存储训练和测试的损失和准确率
     train_losses = []
     test_accuracies = []
 
@@ -264,12 +250,10 @@ def train_model(
         correct = 0
         total = 0
 
-        # 更新学习率调度器
         scheduler.step(epoch)
-        lr = optimizer.state_dict()['param_groups'][0]['lr']
+        lr = optimizer.state_dict()["param_groups"][0]["lr"]
         print("Current LR:", lr)
 
-        # tqdm 进度条显示
         with tqdm(total=len(dataloader), desc=f"Epoch {epoch + 1} Training") as pbar:
             for inputs, targets in dataloader:
 
@@ -280,7 +264,7 @@ def train_model(
                     inputs, targets = last_input, last_labels
 
                 targets = targets.to(torch.long)
-                
+
                 if data_aug:
                     transform = mixup_transform  # np.random.choice([mixup_transform, cutmix_transform])
                     inputs, targets = transform(inputs, targets)
@@ -299,11 +283,9 @@ def train_model(
                 total += targets.size(0)
                 correct += (predicted == mixed_max).sum().item()
 
-                # 更新进度条
                 pbar.set_postfix({"Loss": f"{loss.item():.4f}"})
                 pbar.update(1)
 
-        # 打印训练集的平均损失和准确率
         avg_loss = running_loss / len(dataloader)
         accuracy = correct / total
         train_losses.append(avg_loss)
@@ -311,12 +293,10 @@ def train_model(
             f"Epoch [{epoch + 1}/{epochs}], Training Loss: {avg_loss:.4f}, Training Accuracy: {accuracy * 100:.2f}%"
         )
 
-        # TensorBoard记录
         if writer:
             writer.add_scalar("Train/Loss", avg_loss, epoch)
             writer.add_scalar("Train/Accuracy", accuracy * 100, epoch)
 
-        # 测试集评估
         test_accuracy, test_loss = test_model(
             model, test_loader, criterion, device, epoch
         )
