@@ -3,7 +3,7 @@
 
 <div align="center">
 
- [:sparkles: Overview](#sparkles-overview) | [:computer: Usage](#computer-usage) | [:thinking: Insight](#thinking-insight) | [:link: Cite](#link-cite)
+ [:sparkles: Overview](#sparkles-overview) | [:computer: Usage](#computer-usage) | [:link: License](#link-License)
 
 <div align="left">
 
@@ -12,11 +12,11 @@
 ## :sparkles: Overview
 
 <!-- insert the pdf of framework from assets/framework.pdf -->
-<img src="assets/framework.png" width="100%" height="600px" style="border: none;"></img>
+<img src="assets/framework.png" width="100%" style="border: none;"></img>
 
 ## :computer: Usage
 
-### :rainbow: Environment
+### :rainbow: Create environment
 
 ```bash
 conda create -n ${env_name} -r requirements.txt
@@ -216,31 +216,151 @@ CUDA_VISIBLE_DEVICES=${CUDA_DEVICE_NUM} python ./run_experiment_cvpr.py \
 
 ### :zap: Executing Baselines
 
-```bash
+**LNL methods**
+
+1. <https://github.com/bhanML/Co-teaching>
+2. <https://github.com/xingruiyu/coteaching_plus>
+3. <https://github.com/emalach/UpdateByDisagreement>
+4. <https://github.com/JackYFL/DISC>
+5. <https://github.com/shengliu66/ELR>
+6. <https://github.com/ErikEnglesson/GJS>
+7. <https://github.com/hongxin001/JoCoR>
+8. <https://github.com/ydkim1293/NLNL-Negative-Learning-for-Noisy-Labels>
+9. <https://github.com/yikun2019/PENCIL>
+
+```bib
+@inproceedings{han2018coteaching,
+  title = {Co-teaching: Robust training of deep neural networks with extremely noisy labels},
+  author = {Bo Han and Quanming Yao and Xingrui Yu and Gang Niu and Miao Xu and Weihua Hu and Ivor W. Tsang and Masashi Sugiyama},
+  booktitle = {NeurIPS},
+  year = {2018}
+}
+
+@inproceedings{co-teaching+,
+  title={How does disagreement help generalization against label corruption?},
+  author={Yu, Xingrui and Han, Bo and Yao, Jiangchao and Niu, Gang and Tsang, Ivor and Sugiyama, Masashi},
+  booktitle={International conference on machine learning},
+  pages={7164--7173},
+  year={2019},
+  organization={PMLR}
+}
+
+@article{decoupling,
+  title={Decoupling" when to update" from" how to update"},
+  author={Malach, Eran and Shalev-Shwartz, Shai},
+  journal={Advances in neural information processing systems},
+  volume={30},
+  year={2017}
+}
+
+@inproceedings{DISC,
+  title={Disc: Learning from noisy labels via dynamic instance-specific selection and correction},
+  author={Li, Yifan and Han, Hu and Shan, Shiguang and Chen, Xilin},
+  booktitle={Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition},
+  pages={24070--24079},
+  year={2023}
+}
+
+@article{ELR,
+  title={Early-learning regularization prevents memorization of noisy labels},
+  author={Liu, Sheng and Niles-Weed, Jonathan and Razavian, Narges and Fernandez-Granda, Carlos},
+  journal={Advances in neural information processing systems},
+  volume={33},
+  pages={20331--20342},
+  year={2020}
+}
+
+@article{GJS,
+  title={Generalized jensen-shannon divergence loss for learning with noisy labels},
+  author={Englesson, Erik and Azizpour, Hossein},
+  journal={Advances in Neural Information Processing Systems},
+  volume={34},
+  pages={30284--30297},
+  year={2021}
+}
+
+@inproceedings{JoCoR,
+  title={Combating noisy labels by agreement: A joint training method with co-regularization},
+  author={Wei, Hongxin and Feng, Lei and Chen, Xiangyu and An, Bo},
+  booktitle={Proceedings of the IEEE/CVF conference on computer vision and pattern recognition},
+  pages={13726--13735},
+  year={2020}
+}
+
+@inproceedings{NLNL,
+  title={Nlnl: Negative learning for noisy labels},
+  author={Kim, Youngdong and Yim, Junho and Yun, Juseung and Kim, Junmo},
+  booktitle={Proceedings of the IEEE/CVF international conference on computer vision},
+  pages={101--110},
+  year={2019}
+}
+
+@inproceedings{PENCIL,
+  title={Probabilistic end-to-end noise correction for learning with noisy labels},
+  author={Yi, Kun and Wu, Jianxin},
+  booktitle={Proceedings of the IEEE/CVF conference on computer vision and pattern recognition},
+  pages={7017--7025},
+  year={2019}
+}
+
+```
+
+**Machine Unlearning Methods:**
+
+1. <https://github.com/lmgraves/AmnesiacML>
+2. <https://github.com/OPTML-Group/Unlearn-Sparse>
+3. <https://github.com/IST-DASLab/WoodFisher>
+
+```bib
+
+@inproceedings{graves2021amnesiac,
+  title={Amnesiac machine learning},
+  author={Graves, Laura and Nagisetty, Vineel and Ganesh, Vijay},
+  booktitle={Proceedings of the AAAI Conference on Artificial Intelligence},
+  volume={35},
+  number={13},
+  pages={11516--11524},
+  year={2021}
+}
+
+@article{jia2023model,
+  title={Model sparsity can simplify machine unlearning},
+  author={Liu, Jiancheng and Ram, Parikshit and Yao, Yuguang and Liu, Gaowen and Liu, Yang and SHARMA, PRANAY and Liu, Sijia and others},
+  journal={Advances in Neural Information Processing Systems},
+  volume={36},
+  year={2024}
+}
+
+@article{WF,
+  title={Woodfisher: Efficient second-order approximation for neural network compression},
+  author={Singh, Sidak Pal and Alistarh, Dan},
+  journal={Advances in Neural Information Processing Systems},
+  volume={33},
+  pages={18098--18109},
+  year={2020}
+}
 
 ```
 
 ### :hammer: Check results
 
+After executing scripts of generating experimental dataset, you can check the generated data under the follow directory.
+
 ```bash
 # cd your data directory
-tree $DATA_DIR
+tree data
+```
 
+After executing scripts of training models, you can check the trained models under the follow directory.
+
+```bash
 # cd your model directory
-tree $MODEL_DIR
+tree ckpt
 ```
 
 ### :bar_chart: Evaluation
 
-```bash
-cd data_process
-python load_acc.py
-```
-
-```bash
-cd data_process
-python load_lip_acc.py
-```
+We wrote several jupyter notebooks for analysis, since they are not core code, we will not provide it as supplymentary material. However, we are very pleased to open them if anyone who need them.
 
 ## :scroll: License
 
