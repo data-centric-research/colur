@@ -48,7 +48,7 @@ class DatasetUtils:
 
     def flatten_class_list(self, class_list):
         """
-        扁平化类标签列表，处理嵌套列表。
+        Flatten the class label list, handling nested lists.
         """
         flattened = []
         for item in class_list:
@@ -62,7 +62,7 @@ class DatasetUtils:
         self, dataset, selected_classes, remove_fraction=0.5, remove_all=False
     ):
         """
-        删除选定类别的指定比例样本或全部样本。
+        Remove a specified proportion or all samples of selected classes.
         """
         selected_classes = self.flatten_class_list(selected_classes)
         class_indices = {i: [] for i in selected_classes}
@@ -73,11 +73,11 @@ class DatasetUtils:
 
         removed_indices = []
         if remove_all:
-            # 如果 remove_all 为 True，移除所有指定类别的样本
+            # If remove_all is True, remove all samples of the specified classes
             for label in selected_classes:
                 removed_indices.extend(class_indices[label])
         else:
-            # 按照 remove_fraction 移除样本
+            # Remove samples according to remove_fraction
             for label in selected_classes:
                 indices = class_indices[label]
                 removed_indices.extend(
@@ -91,7 +91,7 @@ class DatasetUtils:
         self, dataset, selected_classes, noise_fraction=0.8, noise_type="gaussian"
     ):
         """
-        为选定类别添加噪声。
+        Add noise to the selected classes.
         """
         selected_classes = self.flatten_class_list(selected_classes)
         noisy_data = []
@@ -116,7 +116,7 @@ class DatasetUtils:
 
     def add_salt_and_pepper_noise(self, image, amount=0.05, salt_vs_pepper=0.5):
         """
-        添加椒盐噪声。
+        Add salt and pepper noise.
         """
         noisy_image = image.clone()
         num_salt = int(amount * image.numel() * salt_vs_pepper)
@@ -132,7 +132,7 @@ class DatasetUtils:
 
     def add_motion_blur_noise(self, image, kernel_size=5):
         """
-        添加运动模糊噪声。
+        Add motion blur noise.
         """
         kernel_motion_blur = torch.zeros((kernel_size, kernel_size))
         kernel_motion_blur[int((kernel_size - 1) / 2), :] = torch.ones(kernel_size)
@@ -156,7 +156,7 @@ class DatasetUtils:
         remove_all=False,
     ):
         """
-        同时执行删除样本和注入噪声的操作。
+        Perform both sample removal and noise injection.
         """
         dataset_after_removal = self.remove_fraction_of_selected_classes(
             dataset, selected_classes_remove, remove_fraction, remove_all
@@ -168,7 +168,7 @@ class DatasetUtils:
 
     def compute_statistics(self, dataset):
         """
-        计算数据集的类别分布、像素均值和标准差，以及每个通道的均值和标准差。
+        Calculate the class distribution, pixel mean and standard deviation, and mean and standard deviation for each channel of the dataset.
         """
         class_counts = {}
         pixel_means, pixel_stds = [], []
@@ -216,17 +216,15 @@ if __name__ == "__main__":
     for dataset_name in datasets_to_test:
         print(f"\nTesting dataset: {dataset_name}")
 
-        # 初始化 DatasetUtils
         dataset_loader = DatasetUtils(
             dataset_name=dataset_name,
             dataset_paths=dataset_paths,
             num_classes_dict=num_classes_dict,
         )
 
-        # 获取数据集
         train_dataset, val_dataset, test_dataset = dataset_loader.get_dataset()
 
-        # 计算并显示原始数据集的统计信息
+        # Calculate and display the statistics of the original dataset
         (
             original_class_counts,
             original_mean,
@@ -235,7 +233,7 @@ if __name__ == "__main__":
             original_channel_stds,
         ) = dataset_loader.compute_statistics(train_dataset)
 
-        # 修改数据集 - 移除部分类别的样本并注入噪声
+        # Modify the dataset - remove samples of certain classes and inject noise
         modified_dataset = dataset_loader.modify_dataset(
             dataset=train_dataset,
             selected_classes_remove=[0, 1, 2, 3, 4],
@@ -245,7 +243,7 @@ if __name__ == "__main__":
             noise_type="salt_pepper",
         )
 
-        # 计算并显示修改后的数据集的统计信息
+        # Calculate and display the statistics of the modified dataset
         (
             modified_class_counts,
             modified_mean,
@@ -254,7 +252,6 @@ if __name__ == "__main__":
             modified_channel_stds,
         ) = dataset_loader.compute_statistics(modified_dataset)
 
-        # 打印统计信息
         data = {
             "Metric": [
                 "Class Distribution",

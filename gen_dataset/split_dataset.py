@@ -126,12 +126,8 @@ def split(dataset_name, case, train_dataset=None, test_dataset=None, num_classes
         np.save(train_0_data_path, D_0_data)
         np.save(train_0_label_path, D_0_labels)
 
-    # train_data_path_case = settings.get_dataset_path(dataset_name, rawcase, "train_data")
-    # train_label_path_case = settings.get_dataset_path(dataset_name, rawcase, "train_label")
     test_data_path_case = settings.get_dataset_path(dataset_name, case, "test_data")
     test_label_path_case = settings.get_dataset_path(dataset_name, case, "test_label")
-    # inc_data_path_case = settings.get_dataset_path(dataset_name, case, "inc_data")
-    # inc_label_path_case = settings.get_dataset_path(dataset_name, case, "inc_label")
     aux_data_path_case = settings.get_dataset_path(dataset_name, case, "aux_data")
     aux__label_path_case = settings.get_dataset_path(dataset_name, case, "aux_label")
     train_0_data_path_case = settings.get_dataset_path(
@@ -144,12 +140,8 @@ def split(dataset_name, case, train_dataset=None, test_dataset=None, num_classes
     subdir = os.path.dirname(train_0_data_path_case)
     os.makedirs(subdir, exist_ok=True)
 
-    # shutil.copy(train_data_path, train_data_path_case)
-    # shutil.copy(train_label_path, train_label_path_case)
     shutil.copy(test_data_path, test_data_path_case)
     shutil.copy(test_label_path, test_label_path_case)
-    # shutil.copy(inc_data_path, inc_data_path_case)
-    # shutil.copy(inc_label_path, inc_label_path_case)
     shutil.copy(aux_data_path, aux_data_path_case)
     shutil.copy(aux__label_path, aux__label_path_case)
     shutil.copy(train_0_data_path, train_0_data_path_case)

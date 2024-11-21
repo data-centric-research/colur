@@ -47,7 +47,7 @@ def model_train(
                     inputs, labels = last_input, last_labels
 
                 if mix_classes > 0:
-                    transform = mixup_transform  # np.random.choice([cutmix_transform, mixup_transform])
+                    transform = mixup_transform
                     labels = labels.to(torch.long)
                     inputs, labels = transform(inputs, labels)
 

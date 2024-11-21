@@ -206,18 +206,7 @@ def train_model(
         eta_min=0.01 * learning_rate,
     )
 
-    # weights = torchvision.models.ResNet18_Weights.DEFAULT
     transform_train = None
-    # if "cifar-100" == dataset_name or "cifar-10" == dataset_name:
-    #     transform_train = transforms.Compose(
-    #         [
-    #             torch.as_tensor,
-    #             # transforms.RandomCrop(32, padding=4),
-    #             transforms.RandomHorizontalFlip(),
-    #             # transforms.RandomRotation(15),
-    #         ]
-    #     )
-
     transform_test = transforms.Compose(
         [
             # weights.transforms()

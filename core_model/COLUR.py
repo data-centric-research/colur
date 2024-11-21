@@ -316,7 +316,7 @@ def label_smooth(labels, num_classes, gamma=0.0):
 
 
 def execute(args):
-    # 1. 获取公共参数
+    # 1. Get common parameters
     num_classes = settings.num_classes_dict[args.dataset]
     # kwargs = parse_kwargs(args.kwargs)
     case = settings.get_case(args.noise_ratio, args.noise_type)
