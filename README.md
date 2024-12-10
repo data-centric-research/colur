@@ -7,7 +7,8 @@
 
 <div align="left">
 
-<!-- ADD WARNING: 只保留了核心代码，如有需要，会提供 baseline 复现、结果分析的jupyter notebook等代码以及训练好的模型。 -->
+
+<! -- ADD WARNING: Only the core code is retained, and code such as baseline repetition, jupyter notebook for results analysis, and trained models are provided if needed. -->
 
 ## :sparkles: Overview
 
