@@ -8,7 +8,7 @@
 <div align="left">
 
 
-<! -- ADD WARNING: Only the core code is retained, and code such as baseline repetition, jupyter notebook for results analysis, and trained models are provided if needed. -->
+<!-- ADD WARNING: Only the core code is retained. If needed, we can provide Jupyter notebooks for baseline reproduction and result analysis, as well as pre-trained models. -->
 
 ## :sparkles: Overview
 
