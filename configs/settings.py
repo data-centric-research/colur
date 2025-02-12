@@ -25,7 +25,7 @@ cifar100_config = {"mean": [0.5071, 0.4865, 0.4409], "std": [0.2673, 0.2564, 0.2
 
 food101_config = {"mean": [0.485, 0.456, 0.406], "std": [0.229, 0.224, 0.225]}
 
-conf_name = "cvpr"
+conf_name = "ijcai"
 
 
 def get_case(noise_ratio, noise_type, suffix=conf_name):
