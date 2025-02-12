@@ -1,5 +1,5 @@
 
-# COLUR: Learning, Unlearning and Relearning from Data with Uncertain Labels via Model Confidence Refinement
+# COLUR: Confidence-Oriented Learning, Unlearning and Relearning with Noisy-Label Data for Model Restoration and Refinement
 
 <div align="center">
 
@@ -31,7 +31,7 @@ Different ratios of symmetric noises are injected into Cifar-10 and Flower-102 d
 
 ```bash
 # CIFAR-10
-PYTHONPATH=${code_base} python gen_dataset/gen_cifar10_exp_data_cvpr.py \
+PYTHONPATH=${code_base} python gen_dataset/gen_cifar10_exp_data.py \
 --dataset_name cifar-10 \
 --data_dir ./data/cifar-10/normal \
 --gen_dir ./data/cifar-10/gen \
@@ -42,7 +42,7 @@ PYTHONPATH=${code_base} python gen_dataset/gen_cifar10_exp_data_cvpr.py \
 
 ```bash
 # Flower-102
-PYTHONPATH=${code_base} python gen_dataset/gen_flower102_exp_data_cvpr.py \
+PYTHONPATH=${code_base} python gen_dataset/gen_flower102_exp_data.py \
 --dataset_name flower-102 \
 --data_dir ./data/flower-102/normal/flowers-102/ \
 --gen_dir ./data/flower-102/gen \
@@ -60,7 +60,7 @@ Different ratios of symmetric noises are injected into Cifar-100 and Oxford-IIIT
 
 ```bash
 # CIFAR-100
-PYTHONPATH=${code_base} python gen_dataset/gen_cifar100_exp_data_cvpr.py \
+PYTHONPATH=${code_base} python gen_dataset/gen_cifar100_exp_data.py \
 --dataset_name cifar-100 \
 --data_dir ./data/cifar-100/normal \
 --gen_dir ./data/cifar-100/gen \
@@ -71,7 +71,7 @@ PYTHONPATH=${code_base} python gen_dataset/gen_cifar100_exp_data_cvpr.py \
 
 ```bash
 # Oxford-IIIT Pet
-PYTHONPATH=${code_base} python gen_dataset/gen_pet37_exp_data_cvpr.py \
+PYTHONPATH=${code_base} python gen_dataset/gen_pet37_exp_data.py \
 --dataset_name pet-37 \
 --data_dir ./data/pet-37/normal/oxford-pets \
 --gen_dir ./data/pet-37/gen \
@@ -88,7 +88,7 @@ PYTHONPATH=${code_base} python gen_dataset/gen_pet37_exp_data_cvpr.py \
 **Pre-train on CIFAR-10.**
 
 ```bash
-CUDA_VISIBLE_DEVICES=${CUDA_DEVICE_NUM} python ./run_experiment_cvpr.py \
+CUDA_VISIBLE_DEVICES=${CUDA_DEVICE_NUM} python ./run_experiment.py \
 --model efficientnet_s \
 --dataset cifar-10 \
 --num_epochs 30 \
@@ -101,7 +101,7 @@ CUDA_VISIBLE_DEVICES=${CUDA_DEVICE_NUM} python ./run_experiment_cvpr.py \
 **Pre-train on Flower-102.**
 
 ```bash
-CUDA_VISIBLE_DEVICES=${CUDA_DEVICE_NUM} python ./run_experiment_cvpr.py \
+CUDA_VISIBLE_DEVICES=${CUDA_DEVICE_NUM} python ./run_experiment.py \
 --model wideresnet50 \
 --dataset flower-102 \
 --num_epochs 20 \
@@ -115,7 +115,7 @@ CUDA_VISIBLE_DEVICES=${CUDA_DEVICE_NUM} python ./run_experiment_cvpr.py \
 **Pre-train on CIFAR-100.**
 
 ```bash
-CUDA_VISIBLE_DEVICES=${CUDA_DEVICE_NUM} python run_experiment_cvpr.py \
+CUDA_VISIBLE_DEVICES=${CUDA_DEVICE_NUM} python run_experiment.py \
 --model efficientnet_s \
 --dataset cifar-100 \
 --num_epochs 400 \
@@ -129,7 +129,7 @@ CUDA_VISIBLE_DEVICES=${CUDA_DEVICE_NUM} python run_experiment_cvpr.py \
 **Pre-train on Oxford-IIIT Pet.**
 
 ```bash
-CUDA_VISIBLE_DEVICES=${CUDA_DEVICE_NUM} python ./run_experiment_cvpr.py \
+CUDA_VISIBLE_DEVICES=${CUDA_DEVICE_NUM} python ./run_experiment.py \
 --model wideresnet50 \
 --dataset pet-37 \
 --num_epochs 15 \
@@ -145,10 +145,10 @@ CUDA_VISIBLE_DEVICES=${CUDA_DEVICE_NUM} python ./run_experiment_cvpr.py \
 
 #### :zap: Incremental training models on symmetric dataset
 
-**Inc-train on CIFAR-10.**
+**Degrade on CIFAR-10.**
 
 ```bash
-CUDA_VISIBLE_DEVICES=${CUDA_DEVICE_NUM} python ./run_experiment_cvpr.py \
+CUDA_VISIBLE_DEVICES=${CUDA_DEVICE_NUM} python ./run_experiment.py \
 --model efficientnet_s \
 --dataset cifar-10 \
 --num_epochs 30 \
@@ -162,10 +162,10 @@ CUDA_VISIBLE_DEVICES=${CUDA_DEVICE_NUM} python ./run_experiment_cvpr.py \
 
 `noise_ratio` may be 0.1/0.25/0.5/0.75/0.9.
 
-**Inc-train on Flower-102.**
+**Degrade on Flower-102.**
 
 ```bash
-CUDA_VISIBLE_DEVICES=${CUDA_DEVICE_NUM} python ./run_experiment_cvpr.py \
+CUDA_VISIBLE_DEVICES=${CUDA_DEVICE_NUM} python ./run_experiment.py \
 --model wideresnet50 \
 --dataset flower-102 \
 --num_epochs 15 \
@@ -181,10 +181,10 @@ CUDA_VISIBLE_DEVICES=${CUDA_DEVICE_NUM} python ./run_experiment_cvpr.py \
 
 #### :zap: Incremental training models on asymmetric dataset
 
-**Inc-train on CIFAR-100.**
+**Degrade on CIFAR-100.**
 
 ```bash
-CUDA_VISIBLE_DEVICES=${CUDA_DEVICE_NUM} python ./run_experiment_cvpr.py \
+CUDA_VISIBLE_DEVICES=${CUDA_DEVICE_NUM} python ./run_experiment.py \
 --model efficientnet_s \
 --dataset cifar-100 \
 --num_epochs 50 \
@@ -198,10 +198,10 @@ CUDA_VISIBLE_DEVICES=${CUDA_DEVICE_NUM} python ./run_experiment_cvpr.py \
 
 `noise_ratio` may be 0.1/0.25/0.5/0.75/0.9.
 
-**Inc-train on Oxford-IIIT Pet.**
+**Degrade on Oxford-IIIT Pet.**
 
 ```bash
-CUDA_VISIBLE_DEVICES=${CUDA_DEVICE_NUM} python ./run_experiment_cvpr.py \
+CUDA_VISIBLE_DEVICES=${CUDA_DEVICE_NUM} python ./run_experiment.py \
 --model wideresnet50 \
 --dataset pet-37 \
 --num_epochs 15 \
@@ -303,45 +303,6 @@ CUDA_VISIBLE_DEVICES=${CUDA_DEVICE_NUM} python ./run_experiment_cvpr.py \
   pages={7017--7025},
   year={2019}
 }
-
-```
-
-**Machine Unlearning Methods:**
-
-1. <https://github.com/lmgraves/AmnesiacML>
-2. <https://github.com/OPTML-Group/Unlearn-Sparse>
-3. <https://github.com/IST-DASLab/WoodFisher>
-
-```bib
-
-@inproceedings{graves2021amnesiac,
-  title={Amnesiac machine learning},
-  author={Graves, Laura and Nagisetty, Vineel and Ganesh, Vijay},
-  booktitle={Proceedings of the AAAI Conference on Artificial Intelligence},
-  volume={35},
-  number={13},
-  pages={11516--11524},
-  year={2021}
-}
-
-@article{jia2023model,
-  title={Model sparsity can simplify machine unlearning},
-  author={Liu, Jiancheng and Ram, Parikshit and Yao, Yuguang and Liu, Gaowen and Liu, Yang and SHARMA, PRANAY and Liu, Sijia and others},
-  journal={Advances in Neural Information Processing Systems},
-  volume={36},
-  year={2024}
-}
-
-@article{WF,
-  title={Woodfisher: Efficient second-order approximation for neural network compression},
-  author={Singh, Sidak Pal and Alistarh, Dan},
-  journal={Advances in Neural Information Processing Systems},
-  volume={33},
-  pages={18098--18109},
-  year={2020}
-}
-
-```
 
 ### :hammer: Check results
 
