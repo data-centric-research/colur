@@ -15,8 +15,7 @@ from gen_dataset.split_dataset import (
     sample_replay_data,
 )
 
-conference_name = "cvpr"
-
+conference_name = "ijcai" # aaai, cvpr, icml...
 
 def create_flower102_npy_files(
     data_dir,

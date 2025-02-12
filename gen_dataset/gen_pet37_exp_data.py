@@ -11,7 +11,7 @@ import json
 from configs import settings
 from gen_dataset.split_dataset import split_data
 
-conference_name = "cvpr"
+conference_name = "ijcai" # aaai, cvpr, icml... = "cvpr"
 
 
 def load_classes_from_file(file_path):
